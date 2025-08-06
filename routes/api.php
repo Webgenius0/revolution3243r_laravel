@@ -127,9 +127,7 @@ Route::middleware(['auth:api'])->controller(RiderVehicleController::class)->pref
 
 });
 
-/*
-# CMS
-*/
+
 
 Route::prefix('cms')->name('cms.')->group(function () {
     Route::get('home', [HomeController::class, 'index'])->name('home');
