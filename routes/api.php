@@ -61,7 +61,6 @@ Route::get('dynamic/page/show/{slug}', [PageController::class, 'show']);
 /*
 # Auth Route
 */
-Route::group(['middleware' => 'guest:api'], function ($router) {
     //register
     Route::post('register', [RegisterController::class, 'register']);
     Route::post('/verify-email', [RegisterController::class, 'verifyOtp']);
@@ -75,7 +74,7 @@ Route::group(['middleware' => 'guest:api'], function ($router) {
     Route::post('/reset-password', [ResetPasswordController::class, 'ResetPassword']);
     //social login
     Route::post('/social-login', [SocialLoginController::class, 'SocialLogin']);
-});
+
 
 Route::group(['middleware' => ['auth:api', 'api-otp']], function ($router) {
     Route::get('/refresh-token', [LoginController::class, 'refreshToken']);
@@ -124,6 +123,8 @@ Route::middleware(['auth:api'])->controller(ChatController::class)->prefix('auth
 });
 Route::middleware(['auth:api'])->controller(RiderVehicleController::class)->prefix('bike')->group(function () {
     Route::get('/details', 'index');
+    Route::post('/add', 'store');
+    Route::post('/update', 'update');
 
 });
 
