@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\Frontend\SettingsController;
 use App\Http\Controllers\Api\Frontend\SocialLinksController;
 use App\Http\Controllers\Api\Frontend\SubscriberController;
+use App\Http\Controllers\Api\PostController as ApiPostController;
 use App\Http\Controllers\Api\RiderVehicleController;
 use Illuminate\Support\Facades\Route;
 
@@ -125,6 +126,17 @@ Route::middleware(['auth:api'])->controller(RiderVehicleController::class)->pref
     Route::get('/details', 'index');
     Route::post('/add', 'store');
     Route::post('/update', 'update');
+
+});
+Route::middleware(['auth:api'])->controller(App\Http\Controllers\Api\PostController::class)->prefix('post')->group(function () {
+    Route::get('/list', 'index');
+    Route::post('/add', 'store');
+    Route::post('/update/{id}', 'update');
+    Route::delete('/delete-post/{id}', 'destroy');
+    Route::post('/like-unlike/{id}', 'like_unlike');
+    Route::post('/comment/{id}', 'comment');
+    Route::get('/comments/{id}', 'allcomment');
+
 
 });
 

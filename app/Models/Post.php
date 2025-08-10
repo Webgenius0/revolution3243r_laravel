@@ -9,16 +9,23 @@ class Post extends Model
 {
     protected $guarded = [];
 
-    protected $appends = [
-        'short_description'
-    ];
 
-    public function getShortDescriptionAttribute()
+
+
+    public function media()
     {
-        $shortDescription = strip_tags($this->content);
-
-        return Str::length($shortDescription) > 200 ? Str::substr($shortDescription, 0, 200) . '...' : $shortDescription;
+        return $this->hasMany(Media::class);
     }
+
+    public function likes()
+    {
+        return $this->hasMany(PostLike::class);
+    }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
 
     public function user()
     {
@@ -39,4 +46,5 @@ class Post extends Model
     {
         return $this->hasMany(Image::class);
     }
+
 }
