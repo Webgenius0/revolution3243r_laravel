@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\Frontend\SettingsController;
 use App\Http\Controllers\Api\Frontend\SocialLinksController;
 use App\Http\Controllers\Api\Frontend\SubscriberController;
+use App\Http\Controllers\Api\PostController as ApiPostController;
 use App\Http\Controllers\Api\RiderVehicleController;
 use Illuminate\Support\Facades\Route;
 
@@ -61,7 +62,6 @@ Route::get('dynamic/page/show/{slug}', [PageController::class, 'show']);
 /*
 # Auth Route
 */
-Route::group(['middleware' => 'guest:api'], function ($router) {
     //register
     Route::post('register', [RegisterController::class, 'register']);
     Route::post('/verify-email', [RegisterController::class, 'verifyOtp']);
@@ -75,7 +75,7 @@ Route::group(['middleware' => 'guest:api'], function ($router) {
     Route::post('/reset-password', [ResetPasswordController::class, 'ResetPassword']);
     //social login
     Route::post('/social-login', [SocialLoginController::class, 'SocialLogin']);
-});
+
 
 Route::group(['middleware' => ['auth:api', 'api-otp']], function ($router) {
     Route::get('/refresh-token', [LoginController::class, 'refreshToken']);
@@ -124,6 +124,19 @@ Route::middleware(['auth:api'])->controller(ChatController::class)->prefix('auth
 });
 Route::middleware(['auth:api'])->controller(RiderVehicleController::class)->prefix('bike')->group(function () {
     Route::get('/details', 'index');
+    Route::post('/add', 'store');
+    Route::post('/update', 'update');
+
+});
+Route::middleware(['auth:api'])->controller(App\Http\Controllers\Api\PostController::class)->prefix('post')->group(function () {
+    Route::get('/list', 'index');
+    Route::post('/add', 'store');
+    Route::post('/update/{id}', 'update');
+    Route::delete('/delete-post/{id}', 'destroy');
+    Route::post('/like-unlike/{id}', 'like_unlike');
+    Route::post('/comment/{id}', 'comment');
+    Route::get('/comments/{id}', 'allcomment');
+
 
 });
 
