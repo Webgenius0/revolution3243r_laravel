@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Auth\UserController;
 use App\Http\Controllers\Api\Auth\SocialLoginController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\FirebaseTokenController;
+use App\Http\Controllers\Api\FollowerController;
 use App\Http\Controllers\Api\Frontend\categoryController;
 use App\Http\Controllers\Api\Frontend\FaqController;
 use App\Http\Controllers\Api\Frontend\HomeController;
@@ -34,7 +35,7 @@ Route::get('/social/links', [SocialLinksController::class, 'index']);
 Route::get('/settings', [SettingsController::class, 'index']);
 Route::get('/faq', [FaqController::class, 'index']);
 
-Route::post('subscriber/store',[SubscriberController::class, 'store'])->name('api.subscriber.store');
+Route::post('subscriber/store', [SubscriberController::class, 'store'])->name('api.subscriber.store');
 
 /*
 # Post
@@ -62,19 +63,19 @@ Route::get('dynamic/page/show/{slug}', [PageController::class, 'show']);
 /*
 # Auth Route
 */
-    //register
-    Route::post('register', [RegisterController::class, 'register']);
-    Route::post('/verify-email', [RegisterController::class, 'verifyOtp']);
-    Route::post('/resend-otp', [RegisterController::class, 'ResendOtp']);
-    // Route::post('/verify-otp', [RegisterController::class, 'VerifyEmail']);
-    //login
-    Route::post('login', [LoginController::class, 'login'])->name('api.login');
-    //forgot password
-    Route::post('/forget-password', [ResetPasswordController::class, 'forgotPassword']);
-    Route::post('/otp-token', [ResetPasswordController::class, 'MakeOtpToken']);
-    Route::post('/reset-password', [ResetPasswordController::class, 'ResetPassword']);
-    //social login
-    Route::post('/social-login', [SocialLoginController::class, 'SocialLogin']);
+//register
+Route::post('register', [RegisterController::class, 'register']);
+Route::post('/verify-email', [RegisterController::class, 'verifyOtp']);
+Route::post('/resend-otp', [RegisterController::class, 'ResendOtp']);
+// Route::post('/verify-otp', [RegisterController::class, 'VerifyEmail']);
+//login
+Route::post('login', [LoginController::class, 'login'])->name('api.login');
+//forgot password
+Route::post('/forget-password', [ResetPasswordController::class, 'forgotPassword']);
+Route::post('/otp-token', [ResetPasswordController::class, 'MakeOtpToken']);
+Route::post('/reset-password', [ResetPasswordController::class, 'ResetPassword']);
+//social login
+Route::post('/social-login', [SocialLoginController::class, 'SocialLogin']);
 
 
 Route::group(['middleware' => ['auth:api', 'api-otp']], function ($router) {
@@ -126,7 +127,6 @@ Route::middleware(['auth:api'])->controller(RiderVehicleController::class)->pref
     Route::get('/details', 'index');
     Route::post('/add', 'store');
     Route::post('/update', 'update');
-
 });
 Route::middleware(['auth:api'])->controller(App\Http\Controllers\Api\PostController::class)->prefix('post')->group(function () {
     Route::get('/list', 'index');
@@ -136,10 +136,17 @@ Route::middleware(['auth:api'])->controller(App\Http\Controllers\Api\PostControl
     Route::post('/like-unlike/{id}', 'like_unlike');
     Route::post('/comment/{id}', 'comment');
     Route::get('/comments/{id}', 'allcomment');
-
-
+    Route::post('/comment/update/{id}', 'updateComment');
+    Route::delete('/comment/delete/{id}', 'deleteComment');
+    Route::get('/likes/{id}', 'wholikes');
+    Route::get('/my-post', 'mypost');
 });
-
+Route::middleware('auth:api')->prefix('user')->group(function () {
+    Route::post('follow/{userId}', [FollowerController::class, 'follow']);
+    Route::post('unfollow/{userId}', [FollowerController::class, 'unfollow']);
+    Route::get('followers', [FollowerController::class, 'followers']);
+    Route::get('followings', [FollowerController::class, 'followings']);
+});
 /*
 # CMS
 */

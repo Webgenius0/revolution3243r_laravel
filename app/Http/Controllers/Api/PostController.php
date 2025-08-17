@@ -8,6 +8,7 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\PostLike;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
@@ -15,13 +16,56 @@ class PostController extends Controller
     // List all posts with their media
     public function index()
     {
-        $posts = Post::withCount(['likes'])->withCount(['comments'])->with('media')  // add likes_count and comments_count
+        $posts = Post::withCount(['likes', 'comments'])
+            ->with('media')
+            ->latest()
+            ->get();
+
+        $data = $posts->map(function ($post) {
+            $authUser = Auth::user();
+
+            // Default no if no authenticated user
+            $isFollowing = false;
+
+            if ($authUser) {
+
+                $isFollowing = $authUser->followings()->where('following_id', $post->user->id)->exists();
+            }
+
+            return [
+                'id' => $post->id,
+                'title' => $post->content,
+                'user_name' => $post->user->name,
+                'user_id' => $post->user->id,
+                'posted_on' => $post->user->created_at->format('F d, Y'),
+                'is_following' => $isFollowing ? 'yes' : 'no',
+                'likes_count' => $post->likes_count,
+                'comments_count' => $post->comments_count,
+                'media' => $post->media,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Posts retrieved successfully',
+            'data' => $data,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Posts retrieved successfully',
+            'data' => $posts
+        ]);
+    }
+    public function mypost()
+    {
+        $posts = auth('api')->user()->posts()->withCount(['likes'])->withCount(['comments'])->with('media')  // add likes_count and comments_count
             ->latest()
             ->get();
 
         return response()->json([
             'success' => true,
-            'message' => 'Posts retrieved successfully',
+            'message' => 'Your Posts retrieved successfully',
             'data' => $posts
         ]);
     }
@@ -185,7 +229,12 @@ class PostController extends Controller
         if (!$post) {
             return response()->json(['success' => false, 'message' => 'Post not found'], 404);
         }
-
+        if ($request->parent_id) {
+            $parentExists = Comment::where('id', $request->parent_id)->exists();
+            if (!$parentExists) {
+                return response()->json(['success' => false, 'message' => 'Parent comment does not exist'], 400);
+            }
+        }
         $comment = new Comment();
         $comment->user_id = auth('api')->id();
         $comment->post_id = $post->id;
@@ -201,23 +250,96 @@ class PostController extends Controller
         ]);
     }
 
-public function allcomment(Request $request, $id)
-{
-    $comments = Comment::where('post_id', $id)
-        ->with('replies')              // recursively load replies
-        ->get();
-    if ($comments->isEmpty()) {
+    public function allcomment(Request $request, $id)
+    {
+        $comments = Comment::where('post_id', $id)
+            ->with('replies')              // recursively load replies
+            ->get();
+        if ($comments->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No comments found for this post'
+            ], 404);
+        }
+
         return response()->json([
-            'success' => false,
-            'message' => 'No comments found for this post'
-        ], 404);
+            'success' => true,
+            'message' => 'Comments retrieved successfully',
+            'data' => $comments,
+        ]);
     }
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Comments retrieved successfully',
-        'data' => $comments,
-    ]);
-}
+    public function updateComment(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'comment' => 'required|string',
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $comment = Comment::find($id);
+
+        if (!$comment) {
+            return response()->json(['success' => false, 'message' => 'Comment not found'], 404);
+        }
+
+        if ($comment->user_id !== auth('api')->id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $comment->comment = $request->comment;
+        $comment->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Comment updated successfully',
+            'data' => $comment,
+        ]);
+    }
+
+    // Delete a comment
+    public function deleteComment(Request $request, $id)
+    {
+        $comment = Comment::find($id);
+
+        if (!$comment) {
+            return response()->json(['success' => false, 'message' => 'Comment not found'], 404);
+        }
+
+        if ($comment->user_id !== auth('api')->id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $comment->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Comment deleted successfully',
+        ]);
+    }
+
+    public function wholikes($id)
+    {
+        $post = Post::with('likes.user')->find($id);  // eager load user for likes
+
+        if (!$post) {
+            return response()->json(['success' => false, 'message' => 'Post not found'], 404);
+        }
+
+        // Get all user names who liked this post
+        $data = $post->likes->map(function ($like) {
+            return [
+                'id' => $like->user->id,
+                'name' => $like->user->name
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Likes retrieved successfully',
+            'data' => $data,
+        ]);
+    }
 }
