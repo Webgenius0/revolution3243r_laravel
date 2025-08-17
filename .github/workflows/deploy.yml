@@ -15,5 +15,6 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
           server: ftp.softvencefsd.xyz
-          username: revulation@softvencefsd.xyz
-          password: "R5#!0Z!u@Sd3kcc2"
+          username: revolution3243r@revolution3243r.softvencefsd.xyz
+          password: "S(HPwic^H&=q~AP^"
+

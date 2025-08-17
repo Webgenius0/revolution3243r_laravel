@@ -8,7 +8,7 @@ use App\Http\Controllers\Web\Frontend\SubscriberController;
 use App\Http\Controllers\Web\NotificationController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/',[HomeController::class, 'index'])->name('home');
+Route::get('/',[HomeController::class, 'login'])->name('home');
 
 Route::get('/affiliate/{slug}',[AffiliateController::class, 'store'])->name('store');
 
