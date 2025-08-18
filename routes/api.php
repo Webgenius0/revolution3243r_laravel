@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\FirebaseTokenController;
 use App\Http\Controllers\Api\FollowerController;
 use App\Http\Controllers\Api\Frontend\categoryController;
+use App\Http\Controllers\Api\Frontend\ChallengeController;
 use App\Http\Controllers\Api\Frontend\FaqController;
 use App\Http\Controllers\Api\Frontend\HomeController;
 use App\Http\Controllers\Api\Frontend\ImageController;
@@ -129,14 +130,20 @@ Route::middleware(['auth:api'])->controller(RiderVehicleController::class)->pref
     Route::post('/add', 'store');
     Route::post('/update', 'update');
 });
+<<<<<<< HEAD
 Route::middleware(['auth:api'])->controller(App\Http\Controllers\Api\PostController::class)->prefix('post')->group(function () {
     Route::post('/list', 'index');
+=======
+Route::middleware(['auth:api'])->controller(PostController::class)->prefix('post')->group(function () {
+    Route::get('/list', 'index');
+>>>>>>> 5a7c8052faf233872cbc133b807d5b6b9a7ef17b
     Route::post('/add', 'store');
     Route::post('/update/{id}', 'update');
     Route::delete('/delete-post/{id}', 'destroy');
     Route::post('/like-unlike/{id}', 'like_unlike');
     Route::post('/comment/{id}', 'comment');
     Route::get('/comments/{id}', 'allcomment');
+<<<<<<< HEAD
     Route::post('/comment/update/{id}', 'updateComment');
     Route::delete('/comment/delete/{id}', 'deleteComment');
     Route::get('/likes/{id}', 'wholikes');
@@ -159,6 +166,24 @@ Route::middleware('auth:api')->prefix('profile')->group(function () {
     Route::post('/friend-request/send/{receiverId}', [App\Http\Controllers\Api\UserProfileController::class, 'send']);
     Route::post('/friend-request/accept/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'accept']);
     Route::post('/friend-request/reject/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'reject']);
+=======
+});
+
+/*
+# API Challenge route
+*/
+Route::middleware(['auth:api'])->controller(ChallengeController::class)->prefix('challenge')->group(function () {
+    Route::get('/list', 'index');
+    Route::get('/my', 'myChallenges');
+    Route::post('/store', 'store');
+    Route::get('/edit/{id}', 'edit');
+    Route::post('/update/{id}', 'update');
+    Route::delete('/delete/{id}', 'destroy');
+    Route::get('/show/{id}', 'show');
+
+    //join challenge
+    Route::post('/join/{challenge_id}', 'join');
+>>>>>>> 5a7c8052faf233872cbc133b807d5b6b9a7ef17b
 });
 /*
 # CMS
