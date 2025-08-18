@@ -22,11 +22,23 @@ class UserProfileController extends Controller
                 'message' => 'User not found'
             ], 404);
         }
-       $sentRequest = FriendRequest::where('sender_id', auth()->user()->id)
-        ->where('receiver_id', $id)
-        ->exists();
+        $sentRequest = FriendRequest::where('sender_id', auth()->user()->id)
+            ->where('receiver_id', $id)
+            ->exists();
 
         // ret
+
+        $posts = $user->posts()
+            ->withCount('likes')                 // Correct withCount syntax
+            ->with(['media', 'comments', 'likes'])
+            ->get();
+
+        // Add is_following flag for each post
+        foreach ($posts as $post) {
+            $post->is_following = auth()->user()->followings()
+                ->where('following_id', $post->user_id) // or $post->user->id
+                ->exists();
+        }
 
         $info = [
             'id' => $user->id,
@@ -36,9 +48,15 @@ class UserProfileController extends Controller
             'total_post' => $user->posts->count(),
             'following' => $user->followings->count(),
             'followers' => $user->followers->count(),
-            'friend_request_sent' => $sentRequest,
-
+            'friend_request_sent' => $sentRequest ?? false, // make sure this variable is defined
+            'posts' => $posts
         ];
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User profile retrieved successfully',
+            'data' => $info
+        ]);
 
         return response()->json([
             'success' => true,
