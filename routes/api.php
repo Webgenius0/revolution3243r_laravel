@@ -145,8 +145,7 @@ Route::middleware(['auth:api'])->controller(App\Http\Controllers\Api\PostControl
     Route::get('/latest-post/{id?}', 'latestpost');
 });
 Route::middleware('auth:api')->prefix('user')->group(function () {
-    Route::post('follow/{userId}', [FollowerController::class, 'follow']);
-    Route::post('unfollow/{userId}', [FollowerController::class, 'unfollow']);
+    Route::post('toggleFollow/{userId}', [FollowerController::class, 'toggleFollow']);
     Route::get('followers', [FollowerController::class, 'followers']);
     Route::get('followings', [FollowerController::class, 'followings']);
     Route::get('blocked-users', [FollowerController::class, 'blockedUsers']);

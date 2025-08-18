@@ -8,7 +8,7 @@ use App\Models\User;
 
 class FollowerController extends Controller
 {
-    public function follow($userId)
+    public function toggleFollow($userId)
     {
         $user = auth('api')->user();
 
@@ -16,23 +16,18 @@ class FollowerController extends Controller
             return response()->json(['success' => false, 'message' => "You can't follow yourself"], 400);
         }
 
-        if ($user->followings()->where('following_id', $userId)->exists()) {
-            $theuser = $user->followings()->where('following_id', $userId)->first();
-            return response()->json(['success' => false, 'message' => 'Already following this user','data'=>$theuser], 400);
+        // Check if already following
+        $isFollowing = $user->followings()->where('following_id', $userId)->exists();
+
+        if ($isFollowing) {
+            // Unfollow
+            $user->followings()->detach($userId);
+            return response()->json(['success' => true, 'message' => 'Unfollowed successfully']);
+        } else {
+            // Follow
+            $user->followings()->attach($userId);
+            return response()->json(['success' => true, 'message' => 'Followed successfully']);
         }
-
-        $user->followings()->attach($userId);
-
-        return response()->json(['success' => true, 'message' => 'Followed successfully']);
-    }
-
-    public function unfollow($userId)
-    {
-        $user = auth('api')->user();
-
-        $user->followings()->detach($userId);
-
-        return response()->json(['success' => true, 'message' => 'Unfollowed successfully']);
     }
 
     public function followers()
