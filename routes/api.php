@@ -130,7 +130,7 @@ Route::middleware(['auth:api'])->controller(RiderVehicleController::class)->pref
     Route::post('/update', 'update');
 });
 Route::middleware(['auth:api'])->controller(App\Http\Controllers\Api\PostController::class)->prefix('post')->group(function () {
-    Route::get('/list', 'index');
+    Route::post('/list', 'index');
     Route::post('/add', 'store');
     Route::post('/update/{id}', 'update');
     Route::delete('/delete-post/{id}', 'destroy');
@@ -140,25 +140,25 @@ Route::middleware(['auth:api'])->controller(App\Http\Controllers\Api\PostControl
     Route::post('/comment/update/{id}', 'updateComment');
     Route::delete('/comment/delete/{id}', 'deleteComment');
     Route::get('/likes/{id}', 'wholikes');
-    Route::get('/my-post/{id?}', 'mypost');
+    Route::post('/my-post/{id?}', 'mypost');
     Route::get('/popular-post/{id?}', 'popularpost');
     Route::get('/latest-post/{id?}', 'latestpost');
 });
 Route::middleware('auth:api')->prefix('user')->group(function () {
-    Route::post('toggleFollow/{userId}', [FollowerController::class, 'toggleFollow']);
-    Route::get('followers', [FollowerController::class, 'followers']);
-    Route::get('followings', [FollowerController::class, 'followings']);
-    Route::get('blocked-users', [FollowerController::class, 'blockedUsers']);
-    Route::post('block/{userId}', [FollowerController::class, 'block']);
-    Route::post('unblock/{userId}', [FollowerController::class, 'unblock']);
+    Route::post('toggleFollow/{userId}', [App\Http\Controllers\Api\FollowerController::class, 'toggleFollow']);
+    Route::get('followers', [App\Http\Controllers\Api\FollowerController::class, 'followers']);
+    Route::get('followings', [App\Http\Controllers\Api\FollowerController::class, 'followings']);
+    Route::get('blocked-users', [App\Http\Controllers\Api\FollowerController::class, 'blockedUsers']);
+    Route::post('block/{userId}', [App\Http\Controllers\Api\FollowerController::class, 'block']);
+    Route::post('unblock/{userId}', [App\Http\Controllers\Api\FollowerController::class, 'unblock']);
 });
 Route::middleware('auth:api')->prefix('profile')->group(function () {
-    Route::get('info/{userId}', [UserProfileController::class, 'profile']);
-    Route::get('friend-request', [UserProfileController::class, 'requests']);
-    Route::get('friends', [UserProfileController::class, 'friends']);
-    Route::post('/friend-request/send/{receiverId}', [UserProfileController::class, 'send']);
-    Route::post('/friend-request/accept/{id}', [UserProfileController::class, 'accept']);
-    Route::post('/friend-request/reject/{id}', [UserProfileController::class, 'reject']);
+    Route::get('info/{userId}', [App\Http\Controllers\Api\UserProfileController::class, 'profile']);
+    Route::get('friend-request', [App\Http\Controllers\Api\UserProfileController::class, 'requests']);
+    Route::get('friends', [App\Http\Controllers\Api\UserProfileController::class, 'friends']);
+    Route::post('/friend-request/send/{receiverId}', [App\Http\Controllers\Api\UserProfileController::class, 'send']);
+    Route::post('/friend-request/accept/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'accept']);
+    Route::post('/friend-request/reject/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'reject']);
 });
 /*
 # CMS

@@ -15,135 +15,180 @@ use Illuminate\Support\Facades\Validator;
 class PostController extends Controller
 {
     // List all posts with their media
-    public function index()
+    // public function index()
+    // {
+    //     $authUser = Auth::user(); // always exists because of auth middleware
+
+    //     $posts = Post::withCount(['likes', 'comments'])
+    //         ->with('media', 'user')
+    //         ->latest()
+    //         ->get()
+    //         ->filter(function ($post) use ($authUser) {
+    //             // Remove posts where the author is blocked by auth user
+    //             return !$authUser->blockedUsers()->where('blocked_user_id', $post->user->id)->exists();
+    //         });
+
+    //     $data = $posts->map(function ($post) use ($authUser) {
+
+    //         $isFollowing = $authUser->followings()->where('following_id', $post->user->id)->exists();
+
+    //         return [
+    //             'id' => $post->id,
+    //             'title' => $post->content,
+    //             'user_name' => $post->user->name,
+    //             'avatar' => $post->user->avatar ? url($post->user->avatar) : null,
+    //             'user_id' => $post->user->id,
+    //             'posted_on' => $post->user->created_at->format('F d, Y'),
+    //             'is_following' => $isFollowing ? 'yes' : 'no',
+    //             'likes_count' => $post->likes_count,
+    //             'comments_count' => $post->comments_count,
+    //             'media' => $post->media,
+    //         ];
+    //     });
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Posts retrieved successfully',
+    //         'data' => $data,
+    //     ]);
+    // }
+
+    public function mypost(Request $request, $id = null)
+{
+    // ✅ Validate type
+    $request->validate([
+        'type' => 'required|in:all,latest,popular',
+    ], [
+        'type.required' => 'The type field is required.',
+        'type.in'       => 'The type must be one of: all, latest, popular.',
+    ]);
+
+    // Get authenticated user or by ID
+    $user = $id ? User::find($id) : auth('api')->user();
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found',
+        ], 404);
+    }
+
+    $type = $request->type;
+
+    // Base query
+    $query = $user->posts()
+        ->withCount(['likes', 'comments'])
+        ->with('media');
+
+    // Apply type filters
+    switch ($type) {
+        case 'latest':
+            $query->latest();
+            break;
+
+        case 'popular':
+            $query->orderByDesc('likes_count');
+            break;
+
+        case 'all':
+        default:
+            // no extra order, just fetch all
+            break;
+    }
+
+    $posts = $query->get();
+
+    // Format posts
+    $data = $posts->map(function ($post) {
+        return [
+            'id'             => $post->id,
+            'title'          => $post->content,
+            'user_name'      => $post->user->name,
+            'avatar'         => $post->user->avatar ? url($post->user->avatar) : null,
+            'user_id'        => $post->user->id,
+            'posted_on'      => $post->created_at->format('F d, Y'),
+            'likes_count'    => $post->likes_count,
+            'comments_count' => $post->comments_count,
+            'media'          => $post->media,
+        ];
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => ucfirst($type) . ' posts retrieved successfully',
+        'data'    => $data,
+    ]);
+}
+
+    public function index(Request $request, $id = null)
     {
-        $authUser = Auth::user(); // always exists because of auth middleware
+        // ✅ Validate request
+        $request->validate([
+            'type' => 'required|in:all,latest,popular,following',
+        ]);
 
-        $posts = Post::withCount(['likes', 'comments'])
-            ->with('media', 'user')
-            ->latest()
-            ->get()
-            ->filter(function ($post) use ($authUser) {
-                // Remove posts where the author is blocked by auth user
-                return !$authUser->blockedUsers()->where('blocked_user_id', $post->user->id)->exists();
-            });
+        // ✅ Auth user or by ID
+        $authUser = $id ? User::find($id) : auth('api')->user();
 
-        $data = $posts->map(function ($post) use ($authUser) {
+        if (!$authUser) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 404);
+        }
 
-            $isFollowing = $authUser->followings()->where('following_id', $post->user->id)->exists();
+        $type = $request->get('type'); // always valid now
 
+        // ✅ Base query
+        $query = Post::withCount(['likes', 'comments'])
+            ->with(['media', 'user']);
+
+        // ✅ Type filtering
+        if ($type === 'latest') {
+            $query->latest(); // newest first
+        } elseif ($type === 'popular') {
+            $query->orderByDesc('likes_count');
+        } elseif ($type === 'following') {
+            $followingIds = $authUser->followings()->pluck('following_id');
+            $query->whereIn('user_id', $followingIds)->latest();
+        } elseif ($type === 'all') {
+            $query->get(); // oldest first
+        }
+
+        // ✅ Get all blocked user IDs once
+        $blockedIds = $authUser->blockedUsers()->pluck('blocked_user_id')->toArray();
+
+        // ✅ Get posts and filter blocked users
+        $posts = $query->get()->filter(function ($post) use ($blockedIds) {
+            return !in_array($post->user->id, $blockedIds);
+        });
+
+        // ✅ Get all following IDs once for efficiency
+        $followingIds = $authUser->followings()->pluck('following_id')->toArray();
+
+        // ✅ Format response
+        $data = $posts->map(function ($post) use ($followingIds) {
             return [
-                'id' => $post->id,
-                'title' => $post->content,
-                'user_name' => $post->user->name,
-                'avatar' => $post->user->avatar ? url($post->user->avatar) : null,
-                'user_id' => $post->user->id,
-                'posted_on' => $post->user->created_at->format('F d, Y'),
-                'is_following' => $isFollowing ? 'yes' : 'no',
-                'likes_count' => $post->likes_count,
+                'id'             => $post->id,
+                'title'          => $post->content,
+                'user_name'      => $post->user->name,
+                'avatar'         => $post->user->avatar ? url($post->user->avatar) : null,
+                'user_id'        => $post->user->id,
+                'posted_on'      => $post->created_at->format('F d, Y'),
+                'is_following'   => in_array($post->user->id, $followingIds) ? 'yes' : 'no',
+                'likes_count'    => $post->likes_count,
                 'comments_count' => $post->comments_count,
-                'media' => $post->media,
+                'media'          => $post->media,
             ];
         });
 
         return response()->json([
             'success' => true,
-            'message' => 'Posts retrieved successfully',
-            'data' => $data,
+            'message' => ucfirst($type) . ' posts retrieved successfully',
+            'data'    => $data,
         ]);
     }
 
-    public function mypost($id = null)
-    {
-        $user = $id ? User::find($id) : auth('api')->user();
-
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not found',
-            ], 404);
-        }
-
-        // Get posts of the user with counts and media
-        $posts = $user->posts()
-            ->withCount(['likes', 'comments'])
-            ->with('media')
-            ->get();
-
-        $posts = $posts->map(function ($p) use ($user) {
-            $isFollowing = $user->followings()
-                ->where('following_id', $p->user->id)
-                ->exists();
-
-            return [
-                'id'             => $p->id,
-                'title'          => $p->content,
-                'user_name'      => $p->user->name,
-                'avatar'         => $p->user->avatar ? url($p->user->avatar) : null,
-                'user_id'        => $p->user->id,
-                'posted_on'      => $p->user->created_at->format('F d, Y'),
-                'is_following'   => $isFollowing ? 'yes' : 'no',
-                'likes_count'    => $p->likes_count,
-                'comments_count' => $p->comments_count,
-                'media'          => $p->media,
-            ];
-        });
-
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Posts retrieved successfully',
-            'data' => $posts
-        ]);
-    }
-    public function latestpost($id = null)
-    {
-        $user = $id ? User::find($id) : auth('api')->user();
-
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not found',
-            ], 404);
-        }
-
-        // Get posts of the user with counts and media
-        $posts = $user->posts()
-            ->withCount(['likes', 'comments'])
-            ->with('media')
-            ->latest()
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Posts retrieved successfully',
-            'data' => $posts
-        ]);
-    }
-    public function popularpost($id = null)
-    {
-        $user = $id ? User::find($id) : auth('api')->user();
-
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not found',
-            ], 404);
-        }
-
-        // Get posts of the user with counts and media
-        $posts = $user->posts()
-            ->withCount(['likes', 'comments'])
-            ->with('media')
-            ->orderByDesc('likes_count') // order by number of likes
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Posts retrieved successfully',
-            'data' => $posts
-        ]);
-    }
 
     // Store a new post with optional media files
     public function store(Request $request)
