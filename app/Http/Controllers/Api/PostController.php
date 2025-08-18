@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\PostLike;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -16,21 +17,20 @@ class PostController extends Controller
     // List all posts with their media
     public function index()
     {
+        $authUser = Auth::user(); // always exists because of auth middleware
+
         $posts = Post::withCount(['likes', 'comments'])
-            ->with('media')
+            ->with('media', 'user')
             ->latest()
-            ->get();
+            ->get()
+            ->filter(function ($post) use ($authUser) {
+                // Remove posts where the author is blocked by auth user
+                return !$authUser->blockedUsers()->where('blocked_user_id', $post->user->id)->exists();
+            });
 
-        $data = $posts->map(function ($post) {
-            $authUser = Auth::user();
+        $data = $posts->map(function ($post) use ($authUser) {
 
-            // Default no if no authenticated user
-            $isFollowing = false;
-
-            if ($authUser) {
-
-                $isFollowing = $authUser->followings()->where('following_id', $post->user->id)->exists();
-            }
+            $isFollowing = $authUser->followings()->where('following_id', $post->user->id)->exists();
 
             return [
                 'id' => $post->id,
@@ -50,6 +50,24 @@ class PostController extends Controller
             'message' => 'Posts retrieved successfully',
             'data' => $data,
         ]);
+    }
+
+    public function mypost($id = null)
+    {
+        $user = $id ? User::find($id) : auth('api')->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        // Get posts of the user with counts and media
+        $posts = $user->posts()
+            ->withCount(['likes', 'comments'])
+            ->with('media')
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -57,19 +75,54 @@ class PostController extends Controller
             'data' => $posts
         ]);
     }
-    public function mypost()
+    public function latestpost($id = null)
     {
-        $posts = auth('api')->user()->posts()->withCount(['likes'])->withCount(['comments'])->with('media')  // add likes_count and comments_count
+        $user = $id ? User::find($id) : auth('api')->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        // Get posts of the user with counts and media
+        $posts = $user->posts()
+            ->withCount(['likes', 'comments'])
+            ->with('media')
             ->latest()
             ->get();
 
         return response()->json([
             'success' => true,
-            'message' => 'Your Posts retrieved successfully',
+            'message' => 'Posts retrieved successfully',
             'data' => $posts
         ]);
     }
+    public function popularpost($id = null)
+    {
+        $user = $id ? User::find($id) : auth('api')->user();
 
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        // Get posts of the user with counts and media
+        $posts = $user->posts()
+            ->withCount(['likes', 'comments'])
+            ->with('media')
+            ->orderByDesc('likes_count') // order by number of likes
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Posts retrieved successfully',
+            'data' => $posts
+        ]);
+    }
 
     // Store a new post with optional media files
     public function store(Request $request)

@@ -17,7 +17,7 @@ class LoginController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->select = ['id', 'name', 'email', 'avatar', 'otp_verified_at', 'last_activity_at'];   
+        $this->select = ['id', 'name', 'email', 'avatar', 'otp_verified_at', 'last_activity_at'];
     }
 
     public function Login(Request $request)
@@ -48,7 +48,7 @@ class LoginController extends Controller
             if (!Hash::check($request->password, $user->password)) {
                 return Helper::jsonResponse(false, 'Invalid password', 401);
             }
-            
+
             //? Check if the email is verified before login is successful
             if (!$user->otp_verified_at) {
                 return Helper::jsonResponse(false, 'Email not verified. Please verify your email before logging in.', 403, ['is_otp_verified' => $user->isOtpVerified]);
@@ -68,7 +68,7 @@ class LoginController extends Controller
             //* Generate token if email is verified
             $token = auth('api')->login($user);
 
-            $data = User::select($this->select)->with('roles')->find(auth('api')->user()->id);
+            $data = User::select($this->select)->find(auth('api')->user()->id);
 
             return response()->json([
                 'status'     => true,

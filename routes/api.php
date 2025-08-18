@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\Frontend\SocialLinksController;
 use App\Http\Controllers\Api\Frontend\SubscriberController;
 use App\Http\Controllers\Api\PostController as ApiPostController;
 use App\Http\Controllers\Api\RiderVehicleController;
+use App\Http\Controllers\Api\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -139,13 +140,26 @@ Route::middleware(['auth:api'])->controller(App\Http\Controllers\Api\PostControl
     Route::post('/comment/update/{id}', 'updateComment');
     Route::delete('/comment/delete/{id}', 'deleteComment');
     Route::get('/likes/{id}', 'wholikes');
-    Route::get('/my-post', 'mypost');
+    Route::get('/my-post/{id?}', 'mypost');
+    Route::get('/popular-post/{id?}', 'popularpost');
+    Route::get('/latest-post/{id?}', 'latestpost');
 });
 Route::middleware('auth:api')->prefix('user')->group(function () {
     Route::post('follow/{userId}', [FollowerController::class, 'follow']);
     Route::post('unfollow/{userId}', [FollowerController::class, 'unfollow']);
     Route::get('followers', [FollowerController::class, 'followers']);
     Route::get('followings', [FollowerController::class, 'followings']);
+    Route::get('blocked-users', [FollowerController::class, 'blockedUsers']);
+    Route::post('block/{userId}', [FollowerController::class, 'block']);
+    Route::post('unblock/{userId}', [FollowerController::class, 'unblock']);
+});
+Route::middleware('auth:api')->prefix('profile')->group(function () {
+    Route::get('info/{userId}', [UserProfileController::class, 'profile']);
+    Route::get('friend-request', [UserProfileController::class, 'requests']);
+    Route::get('friends', [UserProfileController::class, 'friends']);
+    Route::post('/friend-request/send/{receiverId}', [UserProfileController::class, 'send']);
+    Route::post('/friend-request/accept/{id}', [UserProfileController::class, 'accept']);
+    Route::post('/friend-request/reject/{id}', [UserProfileController::class, 'reject']);
 });
 /*
 # CMS

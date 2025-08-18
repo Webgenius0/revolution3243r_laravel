@@ -17,7 +17,8 @@ class FollowerController extends Controller
         }
 
         if ($user->followings()->where('following_id', $userId)->exists()) {
-            return response()->json(['success' => false, 'message' => 'Already following this user'], 400);
+            $theuser = $user->followings()->where('following_id', $userId)->first();
+            return response()->json(['success' => false, 'message' => 'Already following this user','data'=>$theuser], 400);
         }
 
         $user->followings()->attach($userId);
@@ -70,6 +71,59 @@ class FollowerController extends Controller
             'message' => 'Followings retrieved successfully.',
             'count' => $followings->count(),
             'data' => $followings
+        ]);
+    }
+
+
+
+    public function block($userId)
+    {
+        $user = auth('api')->user();
+
+        if ($user->id == $userId) {
+            return response()->json(['success' => false, 'message' => "You can't block yourself"], 400);
+        }
+
+        if ($user->blockedUsers()->where('blocked_user_id', $userId)->exists()) {
+            return response()->json(['success' => false, 'message' => 'User already blocked'], 400);
+        }
+
+        // Detach follow relationships if any
+        $user->followings()->detach($userId);
+        $user->followers()->detach($userId);
+
+        $user->blockedUsers()->attach($userId);
+
+        return response()->json(['success' => true, 'message' => 'User blocked successfully']);
+    }
+
+    // Unblock a user
+    public function unblock($userId)
+    {
+        $user = auth('api')->user();
+        $user->blockedUsers()->detach($userId);
+
+        return response()->json(['success' => true, 'message' => 'User unblocked successfully']);
+    }
+
+    // List of blocked users
+    public function blockedUsers()
+    {
+        $user = auth('api')->user();
+
+        $blocked = $user->blockedUsers->map(function ($b) {
+            return [
+                'id' => $b->id,
+                'name' => $b->name,
+                'avatar' => $b->avatar ? url($b->avatar) : null,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'count' => $blocked->count(),
+            'message' => 'Blocked users retrieved successfully',
+            'data' => $blocked
         ]);
     }
 }

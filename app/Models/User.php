@@ -55,7 +55,6 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     protected $appends = [
-        'role',
         'is_online',
         'balance'
     ];
@@ -178,4 +177,15 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsToMany(User::class, 'follows', 'following_id', 'follower_id')
             ->withTimestamps();
     }
+
+
+    public function blockedUsers()
+{
+    return $this->belongsToMany(User::class, 'user_blocks', 'user_id', 'blocked_user_id');
+}
+
+public function blockedBy()
+{
+    return $this->belongsToMany(User::class, 'user_blocks', 'blocked_user_id', 'user_id');
+}
 }
