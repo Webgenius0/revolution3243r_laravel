@@ -36,6 +36,7 @@ class PostController extends Controller
                 'id' => $post->id,
                 'title' => $post->content,
                 'user_name' => $post->user->name,
+                'avatar' => $post->user->avatar ? url($post->user->avatar) : null,
                 'user_id' => $post->user->id,
                 'posted_on' => $post->user->created_at->format('F d, Y'),
                 'is_following' => $isFollowing ? 'yes' : 'no',
@@ -68,6 +69,26 @@ class PostController extends Controller
             ->withCount(['likes', 'comments'])
             ->with('media')
             ->get();
+
+        $posts = $posts->map(function ($p) use ($user) {
+            $isFollowing = $user->followings()
+                ->where('following_id', $p->user->id)
+                ->exists();
+
+            return [
+                'id'             => $p->id,
+                'title'          => $p->content,
+                'user_name'      => $p->user->name,
+                'avatar'         => $p->user->avatar ? url($p->user->avatar) : null,
+                'user_id'        => $p->user->id,
+                'posted_on'      => $p->user->created_at->format('F d, Y'),
+                'is_following'   => $isFollowing ? 'yes' : 'no',
+                'likes_count'    => $p->likes_count,
+                'comments_count' => $p->comments_count,
+                'media'          => $p->media,
+            ];
+        });
+
 
         return response()->json([
             'success' => true,
