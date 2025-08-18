@@ -49,7 +49,6 @@ class LoginController extends Controller
                 return Helper::jsonResponse(false, 'Invalid password', 401);
             }
 
-            //? Check if the email is verified before login is successful
             if (!$user->otp_verified_at) {
                 return Helper::jsonResponse(false, 'Email not verified. Please verify your email before logging in.', 403, ['is_otp_verified' => $user->isOtpVerified]);
             }else{
