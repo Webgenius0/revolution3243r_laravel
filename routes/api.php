@@ -1,29 +1,30 @@
 <?php
 
-use App\Http\Controllers\Api\Auth\RegisterController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\FollowerController;
+use App\Http\Controllers\Api\Auth\UserController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\LogoutController;
-use App\Http\Controllers\Api\Auth\ResetPasswordController;
-use App\Http\Controllers\Api\Auth\UserController;
-use App\Http\Controllers\Api\Auth\SocialLoginController;
-use App\Http\Controllers\Api\ChatController;
-use App\Http\Controllers\Api\FirebaseTokenController;
-use App\Http\Controllers\Api\FollowerController;
-use App\Http\Controllers\Api\Frontend\categoryController;
+use App\Http\Controllers\Api\UserProfileController;
 use App\Http\Controllers\Api\Frontend\FaqController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\RiderVehicleController;
+use App\Http\Controllers\Api\Auth\RegisterController;
+use App\Http\Controllers\Api\FirebaseTokenController;
 use App\Http\Controllers\Api\Frontend\HomeController;
-use App\Http\Controllers\Api\Frontend\ImageController;
 use App\Http\Controllers\Api\Frontend\PageController;
 use App\Http\Controllers\Api\Frontend\PostController;
-use App\Http\Controllers\Api\Frontend\SubcategoryController;
-use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\Frontend\ImageController;
+use App\Http\Controllers\Api\Auth\SocialLoginController;
+use App\Http\Controllers\Api\Frontend\categoryController;
 use App\Http\Controllers\Api\Frontend\SettingsController;
-use App\Http\Controllers\Api\Frontend\SocialLinksController;
+use App\Http\Controllers\Api\Auth\ResetPasswordController;
+use App\Http\Controllers\Api\Frontend\ChallengeController;
 use App\Http\Controllers\Api\Frontend\SubscriberController;
+use App\Http\Controllers\Api\Frontend\SocialLinksController;
+use App\Http\Controllers\Api\Frontend\SubcategoryController;
 use App\Http\Controllers\Api\PostController as ApiPostController;
-use App\Http\Controllers\Api\RiderVehicleController;
-use App\Http\Controllers\Api\UserProfileController;
-use Illuminate\Support\Facades\Route;
 
 
 //page
@@ -159,6 +160,7 @@ Route::middleware(['auth:api'])->controller(ChallengeController::class)->prefix(
 
     //join challenge
     Route::post('/join/{challenge_id}', 'join');
+});
 
 Route::middleware('auth:api')->prefix('user')->group(function () {
     Route::post('toggleFollow/{userId}', [FollowerController::class, 'toggleFollow']);
