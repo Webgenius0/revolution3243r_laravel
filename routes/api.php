@@ -152,6 +152,7 @@ Route::middleware(['auth:api'])->controller(ChallengeController::class)->prefix(
 
     //join challenge
     Route::post('/join/{challenge_id}', 'join');
+    
 });
 
 /*
