@@ -62,6 +62,7 @@ class RegisterController extends Controller
             $user->save();
 
             // Mail::to($user->email)->send(new OtpMail($user->otp, $user, 'Verify Your Email Address'));
+$user->makeHidden(['roles']);
 
             return response()->json([
                 'status' => 'success',

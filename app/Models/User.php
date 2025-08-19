@@ -55,7 +55,6 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     protected $appends = [
-        'role',
         'is_online',
         'balance'
     ];
@@ -111,11 +110,13 @@ class User extends Authenticatable implements JWTSubject
     }
 
     //chat model relation
-    public function senders() {
+    public function senders()
+    {
         return $this->hasMany(Chat::class, 'sender_id');
     }
 
-    public function receivers() {
+    public function receivers()
+    {
         return $this->hasMany(Chat::class, 'receiver_id');
     }
 
@@ -134,31 +135,57 @@ class User extends Authenticatable implements JWTSubject
         return Room::where('user_one_id', $this->id)->orWhere('user_two_id', $this->id);
     }
 
-    public function profile() {
+    public function profile()
+    {
         return $this->hasOne(Profile::class);
     }
 
-    public function posts() {
+    public function posts()
+    {
         return $this->hasMany(Post::class);
     }
 
-    public function plan() {
+    public function plan()
+    {
         return $this->belongsTo(Plan::class);
     }
 
-    public function transactions() {
+    public function transactions()
+    {
         return $this->hasMany(Transaction::class);
     }
 
-    public function products() {
+    public function products()
+    {
         return $this->hasMany(Product::class);
     }
 
-    public function bike(){
+    public function bike()
+    {
 
-        return $this->hasOne(RiderVehicle::class,'user_id');
+        return $this->hasOne(RiderVehicle::class, 'user_id');
+    }
+
+    public function followings()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'following_id')
+            ->withTimestamps();
+    }
+
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'following_id', 'follower_id')
+            ->withTimestamps();
     }
 
 
+    public function blockedUsers()
+{
+    return $this->belongsToMany(User::class, 'user_blocks', 'user_id', 'blocked_user_id');
+}
 
+public function blockedBy()
+{
+    return $this->belongsToMany(User::class, 'user_blocks', 'blocked_user_id', 'user_id');
+}
 }

@@ -7,22 +7,185 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\PostLike;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
     // List all posts with their media
-    public function index()
+    // public function index()
+    // {
+    //     $authUser = Auth::user(); // always exists because of auth middleware
+
+    //     $posts = Post::withCount(['likes', 'comments'])
+    //         ->with('media', 'user')
+    //         ->latest()
+    //         ->get()
+    //         ->filter(function ($post) use ($authUser) {
+    //             // Remove posts where the author is blocked by auth user
+    //             return !$authUser->blockedUsers()->where('blocked_user_id', $post->user->id)->exists();
+    //         });
+
+    //     $data = $posts->map(function ($post) use ($authUser) {
+
+    //         $isFollowing = $authUser->followings()->where('following_id', $post->user->id)->exists();
+
+    //         return [
+    //             'id' => $post->id,
+    //             'title' => $post->content,
+    //             'user_name' => $post->user->name,
+    //             'avatar' => $post->user->avatar ? url($post->user->avatar) : null,
+    //             'user_id' => $post->user->id,
+    //             'posted_on' => $post->user->created_at->format('F d, Y'),
+    //             'is_following' => $isFollowing ? 'yes' : 'no',
+    //             'likes_count' => $post->likes_count,
+    //             'comments_count' => $post->comments_count,
+    //             'media' => $post->media,
+    //         ];
+    //     });
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Posts retrieved successfully',
+    //         'data' => $data,
+    //     ]);
+    // }
+
+    public function mypost(Request $request, $id = null)
+{
+    // ✅ Validate type
+    $request->validate([
+        'type' => 'required|in:all,latest,popular',
+    ], [
+        'type.required' => 'The type field is required.',
+        'type.in'       => 'The type must be one of: all, latest, popular.',
+    ]);
+
+    // Get authenticated user or by ID
+    $user = $id ? User::find($id) : auth('api')->user();
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found',
+        ], 404);
+    }
+
+    $type = $request->type;
+
+    // Base query
+    $query = $user->posts()
+        ->withCount(['likes', 'comments'])
+        ->with('media');
+
+    // Apply type filters
+    switch ($type) {
+        case 'latest':
+            $query->latest();
+            break;
+
+        case 'popular':
+            $query->orderByDesc('likes_count');
+            break;
+
+        case 'all':
+        default:
+            // no extra order, just fetch all
+            break;
+    }
+
+    $posts = $query->get();
+
+    // Format posts
+    $data = $posts->map(function ($post) {
+        return [
+            'id'             => $post->id,
+            'title'          => $post->content,
+            'user_name'      => $post->user->name,
+            'avatar'         => $post->user->avatar ? url($post->user->avatar) : null,
+            'user_id'        => $post->user->id,
+            'posted_on'      => $post->created_at->format('F d, Y'),
+            'likes_count'    => $post->likes_count,
+            'comments_count' => $post->comments_count,
+            'media'          => $post->media,
+        ];
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => ucfirst($type) . ' posts retrieved successfully',
+        'data'    => $data,
+    ]);
+}
+
+    public function index(Request $request, $id = null)
     {
-        $posts = Post::withCount(['likes'])->withCount(['comments'])->with('media')  // add likes_count and comments_count
-            ->latest()
-            ->get();
+        // ✅ Validate request
+        $request->validate([
+            'type' => 'required|in:all,latest,popular,following',
+        ]);
+
+        // ✅ Auth user or by ID
+        $authUser = $id ? User::find($id) : auth('api')->user();
+
+        if (!$authUser) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        $type = $request->get('type'); // always valid now
+
+        // ✅ Base query
+        $query = Post::withCount(['likes', 'comments'])
+            ->with(['media', 'user']);
+
+        // ✅ Type filtering
+        if ($type === 'latest') {
+            $query->latest(); // newest first
+        } elseif ($type === 'popular') {
+            $query->orderByDesc('likes_count');
+        } elseif ($type === 'following') {
+            $followingIds = $authUser->followings()->pluck('following_id');
+            $query->whereIn('user_id', $followingIds)->latest();
+        } elseif ($type === 'all') {
+            $query->get(); // oldest first
+        }
+
+        // ✅ Get all blocked user IDs once
+        $blockedIds = $authUser->blockedUsers()->pluck('blocked_user_id')->toArray();
+
+        // ✅ Get posts and filter blocked users
+        $posts = $query->get()->filter(function ($post) use ($blockedIds) {
+            return !in_array($post->user->id, $blockedIds);
+        });
+
+        // ✅ Get all following IDs once for efficiency
+        $followingIds = $authUser->followings()->pluck('following_id')->toArray();
+
+        // ✅ Format response
+        $data = $posts->map(function ($post) use ($followingIds) {
+            return [
+                'id'             => $post->id,
+                'title'          => $post->content,
+                'user_name'      => $post->user->name,
+                'avatar'         => $post->user->avatar ? url($post->user->avatar) : null,
+                'user_id'        => $post->user->id,
+                'posted_on'      => $post->created_at->format('F d, Y'),
+                'is_following'   => in_array($post->user->id, $followingIds) ? 'yes' : 'no',
+                'likes_count'    => $post->likes_count,
+                'comments_count' => $post->comments_count,
+                'media'          => $post->media,
+            ];
+        });
 
         return response()->json([
             'success' => true,
-            'message' => 'Posts retrieved successfully',
-            'data' => $posts
+            'message' => ucfirst($type) . ' posts retrieved successfully',
+            'data'    => $data,
         ]);
     }
 
@@ -185,7 +348,12 @@ class PostController extends Controller
         if (!$post) {
             return response()->json(['success' => false, 'message' => 'Post not found'], 404);
         }
-
+        if ($request->parent_id) {
+            $parentExists = Comment::where('id', $request->parent_id)->exists();
+            if (!$parentExists) {
+                return response()->json(['success' => false, 'message' => 'Parent comment does not exist'], 400);
+            }
+        }
         $comment = new Comment();
         $comment->user_id = auth('api')->id();
         $comment->post_id = $post->id;
@@ -201,23 +369,96 @@ class PostController extends Controller
         ]);
     }
 
-public function allcomment(Request $request, $id)
-{
-    $comments = Comment::where('post_id', $id)
-        ->with('replies')              // recursively load replies
-        ->get();
-    if ($comments->isEmpty()) {
+    public function allcomment(Request $request, $id)
+    {
+        $comments = Comment::where('post_id', $id)
+            ->with('replies')              // recursively load replies
+            ->get();
+        if ($comments->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No comments found for this post'
+            ], 404);
+        }
+
         return response()->json([
-            'success' => false,
-            'message' => 'No comments found for this post'
-        ], 404);
+            'success' => true,
+            'message' => 'Comments retrieved successfully',
+            'data' => $comments,
+        ]);
     }
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Comments retrieved successfully',
-        'data' => $comments,
-    ]);
-}
+    public function updateComment(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'comment' => 'required|string',
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $comment = Comment::find($id);
+
+        if (!$comment) {
+            return response()->json(['success' => false, 'message' => 'Comment not found'], 404);
+        }
+
+        if ($comment->user_id !== auth('api')->id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $comment->comment = $request->comment;
+        $comment->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Comment updated successfully',
+            'data' => $comment,
+        ]);
+    }
+
+    // Delete a comment
+    public function deleteComment(Request $request, $id)
+    {
+        $comment = Comment::find($id);
+
+        if (!$comment) {
+            return response()->json(['success' => false, 'message' => 'Comment not found'], 404);
+        }
+
+        if ($comment->user_id !== auth('api')->id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $comment->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Comment deleted successfully',
+        ]);
+    }
+
+    public function wholikes($id)
+    {
+        $post = Post::with('likes.user')->find($id);  // eager load user for likes
+
+        if (!$post) {
+            return response()->json(['success' => false, 'message' => 'Post not found'], 404);
+        }
+
+        // Get all user names who liked this post
+        $data = $post->likes->map(function ($like) {
+            return [
+                'id' => $like->user->id,
+                'name' => $like->user->name
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Likes retrieved successfully',
+            'data' => $data,
+        ]);
+    }
 }

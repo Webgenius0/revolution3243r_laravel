@@ -8,8 +8,8 @@ use App\Http\Controllers\Api\Auth\UserController;
 use App\Http\Controllers\Api\Auth\SocialLoginController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\FirebaseTokenController;
+use App\Http\Controllers\Api\FollowerController;
 use App\Http\Controllers\Api\Frontend\categoryController;
-use App\Http\Controllers\Api\Frontend\ChallengeController;
 use App\Http\Controllers\Api\Frontend\FaqController;
 use App\Http\Controllers\Api\Frontend\HomeController;
 use App\Http\Controllers\Api\Frontend\ImageController;
@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\Frontend\SocialLinksController;
 use App\Http\Controllers\Api\Frontend\SubscriberController;
 use App\Http\Controllers\Api\PostController as ApiPostController;
 use App\Http\Controllers\Api\RiderVehicleController;
+use App\Http\Controllers\Api\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -128,14 +129,20 @@ Route::middleware(['auth:api'])->controller(RiderVehicleController::class)->pref
     Route::post('/add', 'store');
     Route::post('/update', 'update');
 });
-Route::middleware(['auth:api'])->controller(PostController::class)->prefix('post')->group(function () {
-    Route::get('/list', 'index');
+Route::middleware(['auth:api'])->controller(App\Http\Controllers\Api\PostController::class)->prefix('post')->group(function () {
+    Route::post('/list', 'index');
     Route::post('/add', 'store');
     Route::post('/update/{id}', 'update');
     Route::delete('/delete-post/{id}', 'destroy');
     Route::post('/like-unlike/{id}', 'like_unlike');
     Route::post('/comment/{id}', 'comment');
     Route::get('/comments/{id}', 'allcomment');
+    Route::post('/comment/update/{id}', 'updateComment');
+    Route::delete('/comment/delete/{id}', 'deleteComment');
+    Route::get('/likes/{id}', 'wholikes');
+    Route::post('/my-post/{id?}', 'mypost');
+    Route::get('/popular-post/{id?}', 'popularpost');
+    Route::get('/latest-post/{id?}', 'latestpost');
 });
 
 /*
@@ -152,9 +159,23 @@ Route::middleware(['auth:api'])->controller(ChallengeController::class)->prefix(
 
     //join challenge
     Route::post('/join/{challenge_id}', 'join');
-    
-});
 
+Route::middleware('auth:api')->prefix('user')->group(function () {
+    Route::post('toggleFollow/{userId}', [FollowerController::class, 'toggleFollow']);
+    Route::get('followers', [App\Http\Controllers\Api\FollowerController::class, 'followers']);
+    Route::get('followings', [App\Http\Controllers\Api\FollowerController::class, 'followings']);
+    Route::get('blocked-users', [App\Http\Controllers\Api\FollowerController::class, 'blockedUsers']);
+    Route::post('block/{userId}', [App\Http\Controllers\Api\FollowerController::class, 'block']);
+    Route::post('unblock/{userId}', [App\Http\Controllers\Api\FollowerController::class, 'unblock']);
+});
+Route::middleware('auth:api')->prefix('profile')->group(function () {
+    Route::get('info/{userId}', [App\Http\Controllers\Api\UserProfileController::class, 'profile']);
+    Route::get('friend-request', [App\Http\Controllers\Api\UserProfileController::class, 'requests']);
+    Route::get('friends', [App\Http\Controllers\Api\UserProfileController::class, 'friends']);
+    Route::post('/friend-request/send/{receiverId}', [App\Http\Controllers\Api\UserProfileController::class, 'send']);
+    Route::post('/friend-request/accept/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'accept']);
+    Route::post('/friend-request/reject/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'reject']);
+});
 /*
 # CMS
 */

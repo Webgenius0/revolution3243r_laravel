@@ -1,0 +1,1452 @@
+{
+	"info": {
+		"_postman_id": "f389e491-e053-4611-9762-44835ff01f4d",
+		"name": "Revulation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47370622"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Registration",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "saadman0000@gmail.comddhkssssss",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "sssssss",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "111111",
+									"type": "text"
+								},
+								{
+									"key": "password_confirmation",
+									"value": "111111",
+									"type": "text"
+								},
+								{
+									"key": "rider_type",
+									"value": "bike",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/register",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "verify_otp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "saadman0000@gmail.comddhkssssss",
+									"type": "text"
+								},
+								{
+									"key": "otp",
+									"value": "1570",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/verify-email",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"verify-email"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "resend_otp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "saadman0000@gmail.comddhksss",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/resend-otp",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"resend-otp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "saadman0000@gmail.comddhkssssss",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "111111",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/login",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "forgot_password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "saadman0000@gmail.comddhkssssss",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "111111",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/forget-password",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"forget-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reset_password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "saadman0000@gmail.comddhkssssss",
+									"type": "text"
+								},
+								{
+									"key": "otp\n",
+									"value": "4633",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "12345678",
+									"type": "text"
+								},
+								{
+									"key": "password_confirmation",
+									"value": "12345678",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/reset-password",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"reset-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "social_login",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "token",
+									"value": "eyJraWQiOiJTZjJsRnF3a3BYIiwiYWxnIjoiUlMyNTYifQ.eyJpc3MiOiJodHRwczovL2FwcGxlaWQuYXBwbGUuY29tIiwiYXVkIjoiY29tLmNsdXR1cmVjbG9zZXQuYXBwIiwiZXhwIjoxNzUyMzk3Mzc2LCJpYXQiOjE3NTIzMTA5NzYsInN1YiI6IjAwMDk0NS5iMWYzNTA5OGRkMTY0YmUwYjFjNzJkYWIxZjBlZGY1MC4wODMyIiwiY19oYXNoIjoidzBuclJoX1FTSS1UWURGYUh5VXVxdyIsImVtYWlsIjoibWRyaWZhdGFobWVkcm9ueTM5QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJhdXRoX3RpbWUiOjE3NTIzMTA5NzYsIm5vbmNlX3N1cHBvcnRlZCI6dHJ1ZX0.fxa1D9fBlyeU_CGHH2JloBS7LqSDSubt1cjz1einXxhu-6CDaoptZPbnKHjITPzu4j3K7wfCQRE77b7Xd68qAjwdrxOir36YzsgmkqjZCFPT9wICrIr1qE-Sa5aJ9Jms1PZflhez7a94iM4KSD2Q7tzNmFBH7eFzATa8TxH2hbaYWzfhty2Z3BIFt0VCqic0EoheI9QNb_y_eUFUxLzNV6I1QcyivDYD_38VZgLMo--pCfsTM67az4ogUegGcuV-aqo7vi6jr2X0-33zlfG9lv8E8c-4PpJHxUOGyHTm9ZKJ9286uO6AfSKqJSvPp_CFGN5f5Y6GZny8yKkXYWUo5Q",
+									"type": "text"
+								},
+								{
+									"key": "provider",
+									"value": "google",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/social-login",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"social-login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "profile",
+			"item": [
+				{
+					"name": "me",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/me",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update_profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "sadman@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "avatar",
+									"type": "file",
+									"src": "/C:/Users/Md Sadman Sakib/Downloads/photo_2025-07-29_12-22-26.jpg"
+								},
+								{
+									"key": "bio",
+									"value": "demo",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/update-profile",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"update-profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/logout",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Bike",
+			"item": [
+				{
+					"name": "my_Bike",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/bike/details",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"bike",
+								"details"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add_Bike",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "model",
+									"value": "wssss",
+									"type": "text"
+								},
+								{
+									"key": "engine_type",
+									"value": "ww",
+									"type": "text"
+								},
+								{
+									"key": "engine_size",
+									"value": "w",
+									"type": "text"
+								},
+								{
+									"key": "tire_type",
+									"value": "w",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/bike/add",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"bike",
+								"add"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update_bike",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "model",
+									"value": "ss",
+									"type": "text"
+								},
+								{
+									"key": "engine_type",
+									"value": "ww",
+									"type": "text"
+								},
+								{
+									"key": "engine_size",
+									"value": "wsrrrrr",
+									"type": "text"
+								},
+								{
+									"key": "tire_type",
+									"value": "sssss",
+									"type": "text"
+								},
+								{
+									"key": "front_suspension",
+									"value": "s",
+									"type": "text"
+								},
+								{
+									"key": "rear_suspension",
+									"value": "s",
+									"type": "text"
+								},
+								{
+									"key": "front_sprocket",
+									"value": "s",
+									"type": "text"
+								},
+								{
+									"key": "rear_sprocket",
+									"value": "s",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/bike/update",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"bike",
+								"update"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "all_notifications",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/notify",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"notify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "read_all_notifications",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/notify/status/read/all",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"notify",
+								"status",
+								"read",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "single_notifications",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/notify/status/read/04250c05-ebdb-43e3-8602-9c01f584cc6a",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"notify",
+								"status",
+								"read",
+								"04250c05-ebdb-43e3-8602-9c01f584cc6a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "notifications_status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/notifications-status",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"notifications-status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "notifications_update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "allow_email",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "allow_push",
+									"value": "0",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/notifications-update",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"notifications-update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "fire_base_credentials",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "token",
+									"value": "eWWPyVB3_kn5oZvURCD9ea:APA91bEHzMLRD9xpo77gmvnwICDT1vaPJig4ICmBuJCDFXAKU7jn4rsvhtu8KAU1EQWBOyERVNKX6bHlTMCIEhJEJbHfDzpE0R_p1MuL93UJAIfTbWKdAHk",
+									"type": "text"
+								},
+								{
+									"key": "device_id",
+									"value": "D4FE70B9-5193-453B-9440-DE92D20CDA07",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/firebase/token/add",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"firebase",
+								"token",
+								"add"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "fire_base_test",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "allow_email",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "allow_push",
+									"value": "0",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/firebase/test",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"firebase",
+								"test"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "post",
+			"item": [
+				{
+					"name": "all_posts",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/post/list",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"post",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "my_post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/post/list",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"post",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add_post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "content",
+									"value": "Hello",
+									"type": "text"
+								},
+								{
+									"key": "media_files[]",
+									"type": "file",
+									"src": "/C:/Users/Md Sadman Sakib/Downloads/photo_2025-07-30_11-55-21.jpg"
+								},
+								{
+									"key": "media_files[]",
+									"type": "file",
+									"src": "/C:/Users/Md Sadman Sakib/Downloads/6012569_People_Man_3840x2160 (video-converter.com).mp4"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/post/add",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"post",
+								"add"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update_post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "content",
+									"value": "hi",
+									"type": "text"
+								},
+								{
+									"key": "media_files[]",
+									"type": "file",
+									"src": "/C:/Users/Md Sadman Sakib/Downloads/6012569_People_Man_3840x2160 (video-converter.com).mp4"
+								},
+								{
+									"key": "media_files[]",
+									"type": "file",
+									"src": "/C:/Users/Md Sadman Sakib/Downloads/6012569_People_Man_3840x2160 (video-converter.com).mp4"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/post/update/19",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"post",
+								"update",
+								"19"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete_post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "content",
+									"value": "hi",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "media_files[]",
+									"type": "file",
+									"src": "/C:/Users/Md Sadman Sakib/Downloads/6012569_People_Man_3840x2160 (video-converter.com).mp4",
+									"disabled": true
+								},
+								{
+									"key": "media_files[]",
+									"type": "file",
+									"src": "/C:/Users/Md Sadman Sakib/Downloads/6012569_People_Man_3840x2160 (video-converter.com).mp4",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/post/delete-post/19",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"post",
+								"delete-post",
+								"19"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "like_unlike_post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "content",
+									"value": "hi",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "media_files[]",
+									"type": "file",
+									"src": "/C:/Users/Md Sadman Sakib/Downloads/6012569_People_Man_3840x2160 (video-converter.com).mp4",
+									"disabled": true
+								},
+								{
+									"key": "media_files[]",
+									"type": "file",
+									"src": "/C:/Users/Md Sadman Sakib/Downloads/6012569_People_Man_3840x2160 (video-converter.com).mp4",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/post/like-unlike/18",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"post",
+								"like-unlike",
+								"18"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "comment_post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "comment",
+									"value": "hi",
+									"type": "text"
+								},
+								{
+									"key": "parent_id",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/post/comment/18",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"post",
+								"comment",
+								"18"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "comments_get",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "comment",
+									"value": "hi",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/post/comments/18",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"post",
+								"comments",
+								"18"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "comments_update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "comment",
+									"value": "hisss",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/post/comment/update/3",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"post",
+								"comment",
+								"update",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "comments_delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "comment",
+									"value": "hisss",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/post/comment/delete/3",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"post",
+								"comment",
+								"delete",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "who_liked",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "comment",
+									"value": "hisss",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/post/likes/1",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"post",
+								"likes",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Followers",
+			"item": [
+				{
+					"name": "Follow User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/user/follow/2",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"user",
+								"follow",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unfollow User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/user/unfollow/2",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"user",
+								"unfollow",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Followers",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "file",
+							"file": {}
+						},
+						"url": {
+							"raw": "{{domain}}/user/followers",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"user",
+								"followers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Followings",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/user/followings",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"user",
+								"followings"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"const rs = pm.response.json();\r",
+					"if(rs?.token){\r",
+					"pm.environment.set('token',rs.token)\r",
+					"}"
+				]
+			}
+		}
+	]
+}

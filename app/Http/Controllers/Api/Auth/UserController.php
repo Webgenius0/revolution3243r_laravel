@@ -20,7 +20,7 @@ class UserController extends Controller
 
     public function me()
     {
-        $data = User::select($this->select)->with('roles')->find(auth('api')->user()->id);
+        $data = User::select($this->select)->find(auth('api')->user()->id);
         return Helper::jsonResponse(true, 'User details fetched successfully', 200, $data);
     }
 
