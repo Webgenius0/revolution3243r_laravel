@@ -28,8 +28,8 @@ class RiderVehicleController extends Controller
         return response()->json([
             'status'  => false,
             'message' => 'No bike found for the authenticated user.',
-            'code'    => 404,
-        ], 404);
+            'code'    => 200,
+        ], 200);
     }
 
     /**
