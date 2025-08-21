@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en" dir="ltr">
+
 <head>
     <!-- META DATA -->
     <meta charset="UTF-8">
@@ -15,16 +16,16 @@
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset(settings()->favicon ?? 'default/logo.svg') }}" />
 
     <!-- TITLE -->
-    <title>{{ config('app.name') }} - {{ $title ?? settings()->title ?? '' }}</title>
+    <title>{{ config('app.name') }} - {{ $title ?? (settings()->title ?? '') }}</title>
     <!-- Scripts -->
 
     @vite(['resources/js/app.js'])
-    
+
     @include('backend.partials._styles')
 
     @livewireStyles
-    
-    
+
+
 </head>
 
 <body class="ltr app sidebar-mini">
@@ -44,11 +45,15 @@
         @include('backend.partials._footer')
 
     </div>
+    <script>
+        window.authUserId = {{ auth()->check() ? auth()->id() : 'null' }};
+    </script>
+
     <!-- page -->
     @include('backend.partials._scripts')
 
     @livewireScripts
-    
+
 </body>
 
 </html>
