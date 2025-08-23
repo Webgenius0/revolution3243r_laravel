@@ -26,13 +26,7 @@ use App\Http\Controllers\Api\Frontend\SubscriberController;
 use App\Http\Controllers\Api\Frontend\SocialLinksController;
 use App\Http\Controllers\Api\Frontend\SubcategoryController;
 use App\Http\Controllers\Api\PostController as ApiPostController;
-<<<<<<< HEAD
-use App\Http\Controllers\Api\RiderVehicleController;
 use App\Http\Controllers\Api\TrackController;
-use App\Http\Controllers\Api\UserProfileController;
-use Illuminate\Support\Facades\Route;
-=======
->>>>>>> 8d84d599dd99559c75984409829bbf495a0bc995
 
 
 //page
