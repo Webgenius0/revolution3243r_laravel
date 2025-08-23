@@ -35,8 +35,10 @@ use App\Http\Controllers\Web\Backend\Settings\SignatureController;
 use App\Http\Controllers\Web\Backend\SocialLinkController;
 use App\Http\Controllers\Web\Backend\SubcategoryController;
 use App\Http\Controllers\Web\Backend\SubscriberController;
+use App\Http\Controllers\Web\Backend\SubscriptionController;
 use App\Http\Controllers\Web\Backend\TemplateController;
 use App\Http\Controllers\Web\Backend\TransactionController;
+use FontLib\Table\Type\name;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Redis;
 
@@ -346,3 +348,20 @@ Route::get('/optimize', function () {
     Redis::flushAll();
     return redirect()->back()->with('t-success', 'Message sent successfully');
 })->name('optimize');
+
+
+//Subscription routes
+Route::get('/subscription', [SubscriptionController::class,'index']);
+
+Route::controller(SubscriptionController::class)->prefix('subscription')->name('subscription.')->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::get('/create', 'create')->name('create');
+    Route::post('/store', 'store')->name('store');
+    Route::get('/show/{id}', 'show')->name('show');
+    Route::get('/edit/{id}', 'edit')->name('edit');
+    Route::post('/update/{id}', 'update')->name('update');
+    Route::delete('/delete/{id}', 'destroy')->name('destroy');
+    Route::get('/status/{id}', 'status')->name('status');
+});
+
+

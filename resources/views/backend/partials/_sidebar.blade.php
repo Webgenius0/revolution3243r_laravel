@@ -26,13 +26,13 @@
 
 
 
-                <li class="slide">
+                {{-- <li class="slide">
                     <a class="side-menu__item {{  request()->routeIs('admin.chat.*') ? 'has-link active' : '' }}" href="{{ route('admin.chat.index') }}">
                         <i class="fa-brands fa-rocketchat side-menu__icon"></i>
                         <span class="side-menu__label">Chat</span>
                     </a>
-                </li>
-                <li class="sliden {{ env('ACCESS') === false ? 'd-none' : '' }}">
+                </li> --}}
+                {{-- <li class="sliden {{ env('ACCESS') === false ? 'd-none' : '' }}">
                     <a class="side-menu__item {{  request()->routeIs('admin.users.*') ? 'has-link active' : '' }}" data-bs-toggle="slide" href="#">
                         <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 512 512" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32">
                             <rect width="416" height="416" rx="48" ry="48" />
@@ -46,7 +46,7 @@
                         <li><a href="{{ route('admin.roles.index') }}" class="slide-item">Roll</a></li>
                         <li><a href="{{ route('admin.permissions.index') }}" class="slide-item">Permission</a></li>
                     </ul>
-                </li>
+                </li> --}}
                 <li class="slide">
                     <a class="side-menu__item {{  request()->routeIs('admin.setting.*') ? 'has-link active' : '' }}" data-bs-toggle="slide" href="#">
                         <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 512 512">
@@ -55,26 +55,26 @@
                         <span class="side-menu__label">Settings</span><i class="angle fa fa-angle-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a href="{{ route('admin.setting.general.index') }}" class="slide-item">General Settings</a></li>
-                        <li><a href="{{ route('admin.setting.env.index') }}" class="slide-item">Environment Settings</a></li>
+                        {{-- <li><a href="{{ route('admin.setting.general.index') }}" class="slide-item">General Settings</a></li> --}}
+                        {{-- <li><a href="{{ route('admin.setting.env.index') }}" class="slide-item">Environment Settings</a></li> --}}
                         <li><a href="{{ route('admin.setting.logo.index') }}" class="slide-item">Logo Settings</a></li>
                         <li><a href="{{ route('admin.setting.profile.index') }}" class="slide-item">Profile Settings</a></li>
                         <li><a href="{{ route('admin.setting.mail.index') }}" class="slide-item">Mail Settings</a></li>
-                        <li><a href="{{ route('admin.setting.stripe.index') }}" class="slide-item">Stripe Settings</a></li>
-                        <li><a href="{{ route('admin.setting.firebase.index') }}" class="slide-item">Firebase Settings</a></li>
+                        {{-- <li><a href="{{ route('admin.setting.stripe.index') }}" class="slide-item">Stripe Settings</a></li> --}}
+                        {{-- <li><a href="{{ route('admin.setting.firebase.index') }}" class="slide-item">Firebase Settings</a></li> --}}
                         <li><a href="{{ route('admin.setting.social.index') }}" class="slide-item">Social Settings</a></li>
-                        <li><a href="{{ route('admin.setting.google.map.index') }}" class="slide-item">Google Map Settings</a></li>
-                        <li><a href="{{ route('admin.setting.captcha.index') }}" class="slide-item">Captcha Settings</a></li>
-                        <li><a href="{{ route('admin.setting.signature.index') }}" class="slide-item">Signature Settings</a></li>
-                        <li><a href="{{ route('admin.setting.other.index') }}" class="slide-item">Other Settings</a></li>
+                        {{-- <li><a href="{{ route('admin.setting.google.map.index') }}" class="slide-item">Google Map Settings</a></li> --}}
+                        {{-- <li><a href="{{ route('admin.setting.captcha.index') }}" class="slide-item">Captcha Settings</a></li> --}}
+                        {{-- <li><a href="{{ route('admin.setting.signature.index') }}" class="slide-item">Signature Settings</a></li> --}}
+                        {{-- <li><a href="{{ route('admin.setting.other.index') }}" class="slide-item">Other Settings</a></li> --}}
                     </ul>
                 </li>
-                <li class="slide">
+                {{-- <li class="slide">
                     <a class="side-menu__item {{  request()->routeIs('admin.template.*') ? 'has-link active' : '' }}" href="{{ route('admin.template.index') }}">
                         <i class="fa-solid fa-synagogue side-menu__icon"></i>
                         <span class="side-menu__label">Template</span>
                     </a>
-                </li>
+                </li> --}}
                 <li>
                     <h3>CMS</h3>
                 </li>
@@ -86,7 +86,7 @@
                         <span class="side-menu__label">Dynamic Page</span>
                     </a>
                 </li>
-                <li class="slide">
+                {{-- <li class="slide">
                     <a class="side-menu__item {{  request()->routeIs('admin.social.*') ? 'has-link active' : '' }}" href="{{ route('admin.social.index') }}">
                         <i class="fa-solid fa-link side-menu__icon"></i>
                         <span class="side-menu__label">Social Link</span>
@@ -97,7 +97,7 @@
                         <i class="fa-solid fa-clipboard-question side-menu__icon"></i>
                         <span class="side-menu__label">FAQ</span>
                     </a>
-                </li>
+                </li> --}}
 
 
 
@@ -129,15 +129,23 @@
                         <span class="side-menu__label">Menu</span>
                     </a>
                 </li>
+
                 <li class="slide">
-                    <a class="side-menu__item {{  Request::routeIs('ajax.gallery.*') ? 'has-link active' : '' }}" href="{{ route('ajax.gallery.index') }}">
+                    <a class="side-menu__item {{  request()->routeIs('admin.subscription.*') ? 'has-link active' : '' }}" href="{{ route('admin.subscription.index') }}">
+                        {{-- <i class="fa-solid fa-bars-staggered side-menu__icon"></i> --}}
+                        <i class="fa-solid fa-money-bill" style="font-size: 20px; margin-right: 7px;"></i>
+                        <span class="side-menu__label">Subscription</span>
+                    </a>
+                </li>
+                {{-- <li class="slide"> --}}
+                    {{-- <a class="side-menu__item {{  Request::routeIs('ajax.gallery.*') ? 'has-link active' : '' }}" href="{{ route('ajax.gallery.index') }}">
                         <i class="fa-solid fa-image side-menu__icon"></i>
                         <span class="side-menu__label">Image Gallery</span>
                     </a>
                 </li>
                 <li>
                     <h3>CRUD</h3>
-                </li>
+                </li> --}}
 
             </ul>
             <div class="slide-right" id="slide-right"><svg xmlns="http://www.w3.org/2000/svg"

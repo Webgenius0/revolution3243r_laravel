@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\UserProfileController;
 use App\Http\Controllers\Api\Frontend\FaqController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\OnetoOneChatCOntroller;
 use App\Http\Controllers\Api\RiderVehicleController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\FirebaseTokenController;
@@ -177,6 +178,28 @@ Route::middleware('auth:api')->prefix('profile')->group(function () {
     Route::post('/friend-request/send/{receiverId}', [App\Http\Controllers\Api\UserProfileController::class, 'send']);
     Route::post('/friend-request/accept/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'accept']);
     Route::post('/friend-request/reject/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'reject']);
+});
+
+Route::middleware(['auth:api'])->controller(ChallengeController::class)->prefix('challenge')->group(function () {
+    Route::get('/list', 'index');
+    Route::get('/my', 'myChallenges');
+    Route::post('/store', 'store');
+    Route::get('/edit/{id}', 'edit');
+    Route::post('/update/{id}', 'update');
+    Route::delete('/delete/{id}', 'destroy');
+    Route::get('/show/{id}', 'show');
+
+    //join challenge
+    Route::post('/join/{challenge_id}', 'join');
+});
+Route::middleware(['auth:api'])->controller(OnetoOneChatCOntroller::class)->prefix('chat')->group(function () {
+    Route::get('/users', [OnetoOneChatCOntroller::class, 'users']);
+    Route::get('/{userId}', [OnetoOneChatCOntroller::class, 'messages']);
+    Route::post('/send', [OnetoOneChatCOntroller::class, 'send']);
+    Route::post('/read/{userId}', [OnetoOneChatController::class, 'markAsRead']);
+    Route::get('/get/conversation', [OnetoOneChatController::class, 'conversation']);
+   Route::post('update/notifications/{roomId}', [OnetoOneChatCOntroller::class, 'updateNotifications']);
+
 });
 /*
 # CMS

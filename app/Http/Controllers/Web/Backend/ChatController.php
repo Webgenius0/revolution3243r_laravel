@@ -118,6 +118,7 @@ class ChatController extends Controller
             ->limit(50)
             ->get();
 
+
         $room = Room::where(function ($query) use ($receiver_id, $sender_id) {
                 $query->where('user_one_id', $receiver_id)->where('user_two_id', $sender_id);
             })->orWhere(function ($query) use ($receiver_id, $sender_id) {
