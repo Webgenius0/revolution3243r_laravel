@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\Frontend\SubscriberController;
 use App\Http\Controllers\Api\OnetoOneChatCOntroller;
 use App\Http\Controllers\Api\PostController as ApiPostController;
 use App\Http\Controllers\Api\RiderVehicleController;
+use App\Http\Controllers\Api\TrackController;
 use App\Http\Controllers\Api\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -181,8 +182,17 @@ Route::middleware(['auth:api'])->controller(OnetoOneChatCOntroller::class)->pref
     Route::post('/send', [OnetoOneChatCOntroller::class, 'send']);
     Route::post('/read/{userId}', [OnetoOneChatController::class, 'markAsRead']);
     Route::get('/get/conversation', [OnetoOneChatController::class, 'conversation']);
-   Route::post('update/notifications/{roomId}', [OnetoOneChatCOntroller::class, 'updateNotifications']);
+    Route::post('update/notifications/{roomId}', [OnetoOneChatCOntroller::class, 'updateNotifications']);
+});
+Route::middleware(['auth:api'])->controller(TrackController::class)->prefix('track')->group(function () {
+    Route::get('/list', [TrackController::class, 'index']);      // List all tracks
+    Route::post('create', [TrackController::class, 'store']);     // Create new track
+    Route::get('show/{id}', [TrackController::class, 'show']);  // Show single track
+    Route::post('update/{id}', [TrackController::class, 'update']); // Update track
+    Route::delete('delete/{id}', [TrackController::class, 'destroy']); // Delete track
 
+    // ✅ Extra: delete one image/media from a track
+    Route::delete('tracks/{track}/media/{media}', [TrackController::class, 'destroyMedia']);
 });
 /*
 # CMS

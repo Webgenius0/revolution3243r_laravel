@@ -54,71 +54,83 @@ class PostController extends Controller
     // }
 
     public function mypost(Request $request, $id = null)
-{
-    // ✅ Validate type
-    $request->validate([
-        'type' => 'required|in:all,latest,popular',
-    ], [
-        'type.required' => 'The type field is required.',
-        'type.in'       => 'The type must be one of: all, latest, popular.',
-    ]);
+    {
+        // ✅ Validate type
+        $request->validate([
+            'type' => 'required|in:all,latest,popular',
+        ], [
+            'type.required' => 'The type field is required.',
+            'type.in'       => 'The type must be one of: all, latest, popular.',
+        ]);
 
-    // Get authenticated user or by ID
-    $user = $id ? User::find($id) : auth('api')->user();
+        // Get authenticated user
+        $authUser = auth('api')->user();
 
-    if (!$user) {
+        if (!$authUser) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authenticated user not found',
+            ], 404);
+        }
+
+        // Get posts owner (may be another user by $id)
+        $user = $id ? User::find($id) : $authUser;
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        $type = $request->type;
+
+        // Base query
+        $query = $user->posts()
+            ->withCount(['likes', 'comments'])
+            ->with(['media', 'likes']); // include likes for is_liked check
+
+        // Apply type filters
+        switch ($type) {
+            case 'latest':
+                $query->latest();
+                break;
+
+            case 'popular':
+                $query->orderByDesc('likes_count');
+                break;
+
+            case 'all':
+            default:
+                // no extra order
+                break;
+        }
+
+        $posts = $query->get();
+
+        // Format posts
+        $data = $posts->map(function ($post) use ($authUser) {
+            return [
+                'id'             => $post->id,
+                'title'          => $post->content,
+                'user_name'      => $post->user->name,
+                'avatar'         => $post->user->avatar ? url($post->user->avatar) : null,
+                'user_id'        => $post->user->id,
+                'posted_on'      => $post->created_at->format('F d, Y'),
+                'is_liked'       => $post->likes->contains('user_id', $authUser->id), // ✅ use authenticated user
+                'likes_count'    => $post->likes_count,
+                'comments_count' => $post->comments_count,
+                'media'          => $post->media,
+            ];
+        });
+
         return response()->json([
-            'success' => false,
-            'message' => 'User not found',
-        ], 404);
+            'success' => true,
+            'message' => ucfirst($type) . ' posts retrieved successfully',
+            'data'    => $data,
+        ]);
     }
 
-    $type = $request->type;
-
-    // Base query
-    $query = $user->posts()
-        ->withCount(['likes', 'comments'])
-        ->with('media');
-
-    // Apply type filters
-    switch ($type) {
-        case 'latest':
-            $query->latest();
-            break;
-
-        case 'popular':
-            $query->orderByDesc('likes_count');
-            break;
-
-        case 'all':
-        default:
-            // no extra order, just fetch all
-            break;
-    }
-
-    $posts = $query->get();
-
-    // Format posts
-    $data = $posts->map(function ($post) {
-        return [
-            'id'             => $post->id,
-            'title'          => $post->content,
-            'user_name'      => $post->user->name,
-            'avatar'         => $post->user->avatar ? url($post->user->avatar) : null,
-            'user_id'        => $post->user->id,
-            'posted_on'      => $post->created_at->format('F d, Y'),
-            'likes_count'    => $post->likes_count,
-            'comments_count' => $post->comments_count,
-            'media'          => $post->media,
-        ];
-    });
-
-    return response()->json([
-        'success' => true,
-        'message' => ucfirst($type) . ' posts retrieved successfully',
-        'data'    => $data,
-    ]);
-}
 
     public function index(Request $request, $id = null)
     {
@@ -141,7 +153,7 @@ class PostController extends Controller
 
         // ✅ Base query
         $query = Post::withCount(['likes', 'comments'])
-            ->with(['media', 'user']);
+            ->with(['media', 'user', 'likes']); // include likes relation
 
         // ✅ Type filtering
         if ($type === 'latest') {
@@ -167,7 +179,7 @@ class PostController extends Controller
         $followingIds = $authUser->followings()->pluck('following_id')->toArray();
 
         // ✅ Format response
-        $data = $posts->map(function ($post) use ($followingIds) {
+        $data = $posts->map(function ($post) use ($authUser, $followingIds) {
             return [
                 'id'             => $post->id,
                 'title'          => $post->content,
@@ -175,6 +187,7 @@ class PostController extends Controller
                 'avatar'         => $post->user->avatar ? url($post->user->avatar) : null,
                 'user_id'        => $post->user->id,
                 'posted_on'      => $post->created_at->format('F d, Y'),
+                'is_liked'       => $post->likes->contains('user_id', $authUser->id), // ✅ Corrected
                 'is_following'   => in_array($post->user->id, $followingIds) ? 'yes' : 'no',
                 'likes_count'    => $post->likes_count,
                 'comments_count' => $post->comments_count,
@@ -188,6 +201,7 @@ class PostController extends Controller
             'data'    => $data,
         ]);
     }
+
 
 
     // Store a new post with optional media files
@@ -371,22 +385,53 @@ class PostController extends Controller
 
     public function allcomment(Request $request, $id)
     {
+        // Only top-level comments
         $comments = Comment::where('post_id', $id)
-            ->with('replies')              // recursively load replies
+            ->with(['replies.user', 'user'])
+            ->whereNull('parent_id')        // <-- Only main comments
+
             ->get();
+
+        $comments = $comments->map(function ($comment) {
+            return [
+                'id'         => $comment->id,
+                'post_id'    => $comment->post_id,
+                'comment'    => $comment->comment,
+                'user_id'    => $comment->user_id,
+                'user_name'  => $comment->user->name ?? null,
+                'avatar'     => $comment->user->avatar ? url($comment->user->avatar) : null,
+                'created_at' => $comment->created_at->diffForHumans(),
+                'updated_at' => $comment->updated_at->diffForHumans(),
+                'replies'    => $comment->replies->map(function ($repl) {
+                    return [
+                        'id'         => $repl->id,
+                        'post_id'    => $repl->post_id,
+                        'comment'    => $repl->comment,
+                        'parent_id'  => $repl->parent_id,
+                        'user_id'    => $repl->user_id,
+                        'user_name'  => $repl->user->name ?? null,
+                        'avatar'     => $repl->user->avatar ? url($repl->user->avatar) : null,
+                        'created_at' => $repl->created_at->diffForHumans(),
+                        'updated_at' => $repl->updated_at->diffForHumans(),
+                    ];
+                }),
+            ];
+        });
+
         if ($comments->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'message' => 'No comments found for this post'
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
             'success' => true,
             'message' => 'Comments retrieved successfully',
-            'data' => $comments,
-        ]);
+            'data'    => $comments,
+        ], 200);
     }
+
 
     public function updateComment(Request $request, $id)
     {
@@ -450,8 +495,9 @@ class PostController extends Controller
         // Get all user names who liked this post
         $data = $post->likes->map(function ($like) {
             return [
-                'id' => $like->user->id,
-                'name' => $like->user->name
+                'id'     => $like->user->id,
+                'name'   => $like->user->name,
+                'avatar' => $like->user->avatar ? url($like->user->avatar) : null, // ✅ fixed
             ];
         });
 
