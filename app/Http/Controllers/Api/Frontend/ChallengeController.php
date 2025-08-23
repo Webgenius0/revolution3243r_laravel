@@ -377,25 +377,4 @@ class ChallengeController extends Controller
             return Helper::jsonResponse(false, $e->getMessage(), 500);
         }
     }
-
-    /**
-     * Calculate distance between two lat/long (in KM)
-     */
-    private function calculateDistance($lat1, $lon1, $lat2, $lon2): float
-    {
-        $earthRadius = 6371; // KM
-
-        $latFrom = deg2rad($lat1);
-        $lonFrom = deg2rad($lon1);
-        $latTo = deg2rad($lat2);
-        $lonTo = deg2rad($lon2);
-
-        $latDelta = $latTo - $latFrom;
-        $lonDelta = $lonTo - $lonFrom;
-
-        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-
-        return round($earthRadius * $angle, 2); // 2 decimal place
-    }
 }
