@@ -19,4 +19,9 @@ class TrackImage extends Model
     {
         return $this->belongsTo(Track::class);
     }
+
+    public function getimageAttribute($value)
+    {
+        return $value ? asset($value) : null;
+    }
 }
