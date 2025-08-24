@@ -36,6 +36,7 @@ class UserController extends Controller
         $data = [
             'id' => $data->id,
             'name' => $data->name,
+            'bio' => $data->bio,
             'avatar' => $data->avatar,
             'email' => $data->email,
             'total_post' => $data->posts->count(),
