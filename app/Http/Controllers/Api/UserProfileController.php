@@ -327,8 +327,8 @@ public function cancelRequest($receiverId)
         $friendsAsReceiver = FriendRequest::with('sender')
             ->where('receiver_id', $userId)
             ->where('status', 'accepted')
-            ->get()
-            ->map(function ($req) {
+            ->get();
+            $friendsAsReceiver->map(function ($req) {
                 return [
                     'friend_id' => $req->sender->id,
                     'friend_name' => $req->sender->name,
@@ -341,8 +341,8 @@ public function cancelRequest($receiverId)
         $friendsAsSender = FriendRequest::with('receiver')
             ->where('sender_id', $userId)
             ->where('status', 'accepted')
-            ->get()
-            ->map(function ($req) {
+            ->get();
+            $friendsAsSender->map(function ($req) {
                 return [
                     'friend_id' => $req->receiver->id,
                     'friend_name' => $req->receiver->name,
@@ -357,7 +357,7 @@ public function cancelRequest($receiverId)
         return response()->json([
             'success' => true,
             'message' => 'Friends retrieved successfully',
-            'data' => $friends(),
+            'data' => $friends,
         ]);
     }
     // Reject request
