@@ -71,6 +71,7 @@ Route::get('dynamic/page/show/{slug}', [PageController::class, 'show']);
 Route::post('register', [RegisterController::class, 'register']);
 Route::post('/verify-email', [RegisterController::class, 'verifyOtp']);
 Route::post('/resend-otp', [RegisterController::class, 'ResendOtp']);
+// Route::post('/change-password', [RegisterController::class, 'ResendOtp']);
 // Route::post('/verify-otp', [RegisterController::class, 'VerifyEmail']);
 //login
 Route::post('login', [LoginController::class, 'login'])->name('api.login');

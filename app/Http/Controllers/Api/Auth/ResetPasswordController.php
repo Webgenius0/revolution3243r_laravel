@@ -61,50 +61,80 @@ class ResetPasswordController extends Controller
 
 
 
-    public function resetPassword(Request $request)
+       public function MakeOtpToken(Request $request)
     {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'otp'   => 'required|digits:4',
+        ]);
+
         try {
-            // Validate input
-            $request->validate([
-                'email' => 'required|email|exists:users,email',
-                'otp' => 'required|digits:4',
-                'password' => 'required|string|min:6|confirmed',
-            ]);
+            $email = $request->input('email');
+            $otp   = $request->input('otp');
+            $user = User::where('email', $email)->first();
 
-            // Find the user
-            $user = User::where('email', $request->email)->first();
-
-            // Check OTP and expiry
-            if (!$user || $user->otp !== $request->otp) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid OTP code.',
-                ], 401);
+            if (!$user) {
+                return Helper::jsonErrorResponse( 'User not found', 404);
             }
 
-            if (Carbon::now()->gt(Carbon::parse($user->otp_expires_at))) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'OTP code has expired.',
-                ], 403);
+            if (Carbon::parse($user->otp_expires_at)->isPast()) {
+                return Helper::jsonErrorResponse('OTP has expired.', 400);
             }
 
-            // Update password
-            $user->password = Hash::make($request->password);
+            if ($user->otp !== $otp) {
+                return Helper::jsonErrorResponse('Invalid OTP', 400);
+            }
+            $token = Str::random(60);
+
             $user->otp = null;
             $user->otp_expires_at = null;
+            $user->reset_password_token = $token;
+            $user->reset_password_token_expire_at = Carbon::now()->addHour();
+
             $user->save();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Password has been reset successfully.',
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Something went wrong.',
-                'error' => $e->getMessage()
-            ], 500);
+                'status'     => true,
+                'message'    => 'OTP verified successfully.',
+                'code'       => 200,
+                'token'      => $token,
+            ]);
+        } catch (Exception $e) {
+            return Helper::jsonErrorResponse($e->getMessage(), 500);
+        }
+    }
+     public function ResetPassword(Request $request)
+    {
+
+        $request->validate([
+            'email'    => 'required|email|exists:users,email',
+            'token'    => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+        try {
+            $email       = $request->input('email');
+            $newPassword = $request->input('password');
+
+            $user = User::where('email', $email)->first();
+            if (!$user) {
+                return Helper::jsonErrorResponse( 'User not found', 404);
+            }
+
+            if (!empty($user->reset_password_token) && $user->reset_password_token === $request->token && $user->reset_password_token_expire_at >= Carbon::now()) {
+
+                $user->password = Hash::make($newPassword);
+                $user->reset_password_token = null;
+                $user->reset_password_token_expire_at = null;
+
+                $user->save();
+
+                return Helper::jsonResponse(true, 'Password reset successfully.', 200);
+            }else{
+                return Helper::jsonErrorResponse('Invalid Token', 419);
+            }
+
+        } catch (Exception $e) {
+            return Helper::jsonErrorResponse($e->getMessage(), 500);
         }
     }
 }
