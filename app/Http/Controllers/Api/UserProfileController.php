@@ -57,10 +57,21 @@ class UserProfileController extends Controller
                 'id'           => $post->id,
                 'user_id'      => $post->user_id,
                 'name'         => optional($post->user)->name,
+                'is_liked'     => $post->likes->contains('user_id', auth()->id()),
+                'posted_on'     => $post->created_at->diffForHumans(),
                 'content'      => $post->content,
                 'avatar'       => optional($post->user)->avatar ? url($post->user->avatar) : null,
                 'likes_count'  => $post->likes_count,
                 'is_following' => $isFollowing,
+                'liked_by' => $post->likes->map(function ($like) {
+                    return [
+                        'post_id'   => $like->post_id,
+                        'user_id'   => $like->user_id,
+                        'user_name' => optional($like->user)->name,
+                        'avatar'    => optional($like->user)->avatar ? url($like->user->avatar) : null,
+                    ];
+                }),
+
                 'media'        => $post->media,
                 'comments'     => $post->comments->map(function ($comment) {
                     return [
