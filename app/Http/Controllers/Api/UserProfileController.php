@@ -320,46 +320,33 @@ public function cancelRequest($receiverId)
 }
 
     public function friends()
-    {
-        $userId = Auth::id();
+{
+    $userId = Auth::id();
 
-        // Friends where user is the receiver
-        $friendsAsReceiver = FriendRequest::with('sender')
-            ->where('receiver_id', $userId)
-            ->where('status', 'accepted')
-            ->get();
-            $friendsAsReceiver->map(function ($req) {
-                return [
-                    'friend_id' => $req->sender->id,
-                    'friend_name' => $req->sender->name,
-                    'friend_avatar' => $req->sender->avatar ? url($req->sender->avatar) : null,
-                    'friend_since' => $req->updated_at->diffForHumans(),
-                ];
-            });
+    $friends = FriendRequest::with(['sender', 'receiver'])
+        ->where('status', 'accepted')
+        ->where(function ($q) use ($userId) {
+            $q->where('sender_id', $userId)
+              ->orWhere('receiver_id', $userId);
+        })
+        ->get()
+        ->map(function ($req) use ($userId) {
+            $friend = $req->sender_id === $userId ? $req->receiver : $req->sender;
+            return [
+                'friend_id' => $friend->id,
+                'friend_name' => $friend->name,
+                'friend_avatar' => $friend->avatar ? url($friend->avatar) : null,
+                'friend_since' => $req->updated_at->diffForHumans(),
+            ];
+        });
 
-        // Friends where user is the sender
-        $friendsAsSender = FriendRequest::with('receiver')
-            ->where('sender_id', $userId)
-            ->where('status', 'accepted')
-            ->get();
-            $friendsAsSender->map(function ($req) {
-                return [
-                    'friend_id' => $req->receiver->id,
-                    'friend_name' => $req->receiver->name,
-                    'friend_avatar' => $req->receiver->avatar ? url($req->receiver->avatar) : null,
-                    'friend_since' => $req->updated_at->diffForHumans(),
-                ];
-            });
+    return response()->json([
+        'success' => true,
+        'message' => 'Friends retrieved successfully',
+        'data' => $friends,
+    ]);
+}
 
-        // Merge both
-        $friends = $friendsAsReceiver->merge($friendsAsSender);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Friends retrieved successfully',
-            'data' => $friends,
-        ]);
-    }
     // Reject request
     public function reject($id)
     {
