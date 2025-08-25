@@ -12,85 +12,103 @@ class UserProfileController extends Controller
 {
     //
 
-   public function profile($id)
-{
-    $user = User::find($id);
+    public function profile($id)
+    {
+        $user = User::find($id);
 
-    if (!$user) {
-        return response()->json([
-            'success' => false,
-            'message' => 'User not found'
-        ], 404);
-    }
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
 
-    $sentRequest = FriendRequest::where('sender_id', auth()->user()->id)
-        ->where('receiver_id', $id)
-        ->exists();
-
-    $posts = $user->posts()
-        ->withCount('likes')                 // gives likes_count automatically
-        ->with(['media', 'comments.user', 'comments.replies.user'])
-        ->get();
-
-    $posts = $posts->map(function ($post) {
-        $isFollowing = auth()->user()->followings()
-            ->where('following_id', $post->user_id)
+        // Check if authenticated user and profile user are friends
+        $isFriend = FriendRequest::where(function ($q) use ($id) {
+            $q->where(function ($q2) use ($id) {
+                $q2->where('sender_id', auth()->user()->id)
+                    ->where('receiver_id', $id);
+            })
+                ->orWhere(function ($q2) use ($id) {
+                    $q2->where('sender_id', $id)
+                        ->where('receiver_id', auth()->user()->id);
+                });
+        })
+            ->where('status', 'accepted')
             ->exists();
 
-        return [
-            'id'           => $post->id,
-            'user_id'      => $post->user_id,
-            'name'         => optional($post->user)->name,
-            'content'      => $post->content,
-            'avatar'       => optional($post->user)->avatar ? url($post->user->avatar) : null,
-            'likes_count'  => $post->likes_count,
-            'is_following' => $isFollowing,
-            'media'        => $post->media,
-            'comments'     => $post->comments->map(function ($comment) {
-                return [
-                    'id'         => $comment->id,
-                    'post_id'    => $comment->post_id,
-                    'parent_id'  => $comment->parent_id,
-                    'user_id'    => $comment->user_id,
-                    'user_name'  => optional($comment->user)->name,
-                    'avatar'     => optional($comment->user)->avatar ? url($comment->user->avatar) : null,
-                    'comment'    => $comment->comment,
-                    'created_at' => $comment->created_at->diffForHumans(),
-                    'replies'    => $comment->replies->map(function ($reply) {
-                        return [
-                            'id'         => $reply->id,
-                            'post_id'    => $reply->post_id,
-                            'parent_id'  => $reply->parent_id,
-                            'user_id'    => $reply->user_id,
-                            'user_name'  => optional($reply->user)->name,
-                            'avatar'     => optional($reply->user)->avatar ? url($reply->user->avatar) : null,
-                            'comment'    => $reply->comment,
-                            'created_at' => $reply->created_at->diffForHumans(),
-                        ];
-                    })->values(),
-                ];
-            })->values(),
+        // Check if authenticated user has sent a friend request (pending)
+        $sentRequest = FriendRequest::where('sender_id', auth()->user()->id)
+            ->where('receiver_id', $id)
+            ->where('status', 'pending')
+            ->exists();
+
+        $posts = $user->posts()
+            ->withCount('likes')                 // gives likes_count automatically
+            ->with(['media', 'comments.user', 'comments.replies.user'])
+            ->get();
+
+        $posts = $posts->map(function ($post) {
+            $isFollowing = auth()->user()->followings()
+                ->where('following_id', $post->user_id)
+                ->exists();
+
+            return [
+                'id'           => $post->id,
+                'user_id'      => $post->user_id,
+                'name'         => optional($post->user)->name,
+                'content'      => $post->content,
+                'avatar'       => optional($post->user)->avatar ? url($post->user->avatar) : null,
+                'likes_count'  => $post->likes_count,
+                'is_following' => $isFollowing,
+                'media'        => $post->media,
+                'comments'     => $post->comments->map(function ($comment) {
+                    return [
+                        'id'         => $comment->id,
+                        'post_id'    => $comment->post_id,
+                        'parent_id'  => $comment->parent_id,
+                        'user_id'    => $comment->user_id,
+                        'user_name'  => optional($comment->user)->name,
+                        'avatar'     => optional($comment->user)->avatar ? url($comment->user->avatar) : null,
+                        'comment'    => $comment->comment,
+                        'created_at' => $comment->created_at->diffForHumans(),
+                        'replies'    => $comment->replies->map(function ($reply) {
+                            return [
+                                'id'         => $reply->id,
+                                'post_id'    => $reply->post_id,
+                                'parent_id'  => $reply->parent_id,
+                                'user_id'    => $reply->user_id,
+                                'user_name'  => optional($reply->user)->name,
+                                'avatar'     => optional($reply->user)->avatar ? url($reply->user->avatar) : null,
+                                'comment'    => $reply->comment,
+                                'created_at' => $reply->created_at->diffForHumans(),
+                            ];
+                        })->values(),
+                    ];
+                })->values(),
+            ];
+        });
+
+        $info = [
+            'id'                  => $user->id,
+            'name'                => $user->name,
+            'bio'                 => $user->bio,
+            'avatar'              => $user->avatar ? url($user->avatar) : null,
+            'total_post'          => $user->posts->count(),
+            'following'           => $user->followings->count(),
+            'followers'           => $user->followers->count(),
+            'friend'              => $isFriend,
+            'friend_request_sent' => $sentRequest,
+            'posts'               => $posts,
         ];
-    });
 
-    $info = [
-        'id'                    => $user->id,
-        'name'                  => $user->name,
-        'bio'                   => $user->bio,
-        'avatar'                => $user->avatar ? url($user->avatar) : null,
-        'total_post'            => $user->posts->count(),
-        'following'             => $user->followings->count(),
-        'followers'             => $user->followers->count(),
-        'friend_request_sent'   => $sentRequest ?? false,
-        'posts'                 => $posts,
-    ];
+        return response()->json([
+            'success' => true,
+            'message' => 'User profile retrieved successfully',
+            'data'    => $info
+        ]);
+    }
 
-    return response()->json([
-        'success' => true,
-        'message' => 'User profile retrieved successfully',
-        'data'    => $info
-    ]);
-}
 
 
 
@@ -117,6 +135,7 @@ class UserProfileController extends Controller
         FriendRequest::create([
             'sender_id' => $senderId,
             'receiver_id' => $receiverId,
+            'status' => 'pending',
         ]);
 
 
@@ -158,6 +177,31 @@ class UserProfileController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Pending friend requests retrieved successfully',
+            'data' => $requests,
+        ]);
+    }
+    public function requested()
+    {
+        $userId = Auth::id();
+
+        $requests = FriendRequest::with('sender')
+            ->where('sender_id', $userId)
+            ->where('status', 'pending')
+            ->get()
+            ->map(function ($req) {
+                return [
+                    'id' => $req->id,
+                    'reciver_name' => $req->receiver->name,
+                    'reciver_id' => $req->receiver->id,
+                    'reciver_avatar' => $req->receiver->avatar ? url($req->receiver->avatar) : null,
+                    'status' => $req->status,
+                    'sent_at' => $req->created_at->diffForHumans(),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pending friend requested retrieved successfully',
             'data' => $requests,
         ]);
     }

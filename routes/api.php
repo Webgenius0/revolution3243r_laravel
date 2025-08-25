@@ -175,6 +175,7 @@ Route::middleware('auth:api')->prefix('user')->group(function () {
 Route::middleware('auth:api')->prefix('profile')->group(function () {
     Route::get('info/{userId}', [App\Http\Controllers\Api\UserProfileController::class, 'profile']);
     Route::get('friend-request', [App\Http\Controllers\Api\UserProfileController::class, 'requests']);
+    Route::get('friend-requested', [App\Http\Controllers\Api\UserProfileController::class, 'requested']);
     Route::get('friends', [App\Http\Controllers\Api\UserProfileController::class, 'friends']);
     Route::post('/friend-request/send/{receiverId}', [App\Http\Controllers\Api\UserProfileController::class, 'send']);
     Route::post('/friend-request/accept/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'accept']);
