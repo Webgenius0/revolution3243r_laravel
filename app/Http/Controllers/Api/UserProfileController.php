@@ -12,58 +12,86 @@ class UserProfileController extends Controller
 {
     //
 
-    public function profile($id)
-    {
-        $user = User::find($id);
+   public function profile($id)
+{
+    $user = User::find($id);
 
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not found'
-            ], 404);
-        }
-        $sentRequest = FriendRequest::where('sender_id', auth()->user()->id)
-            ->where('receiver_id', $id)
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not found'
+        ], 404);
+    }
+
+    $sentRequest = FriendRequest::where('sender_id', auth()->user()->id)
+        ->where('receiver_id', $id)
+        ->exists();
+
+    $posts = $user->posts()
+        ->withCount('likes')                 // gives likes_count automatically
+        ->with(['media', 'comments.user', 'comments.replies.user'])
+        ->get();
+
+    $posts = $posts->map(function ($post) {
+        $isFollowing = auth()->user()->followings()
+            ->where('following_id', $post->user_id)
             ->exists();
 
-        // ret
-
-        $posts = $user->posts()
-            ->withCount('likes')                 // Correct withCount syntax
-            ->with(['media', 'comments', 'likes'])
-            ->get();
-
-        // Add is_following flag for each post
-        foreach ($posts as $post) {
-            $post->is_following = auth()->user()->followings()
-                ->where('following_id', $post->user_id) // or $post->user->id
-                ->exists();
-        }
-
-        $info = [
-            'id' => $user->id,
-            'name' => $user->name,
-            'bio' => $user->bio,
-            'avatar' => $user->avatar ? url($user->avatar) : null,
-            'total_post' => $user->posts->count(),
-            'following' => $user->followings->count(),
-            'followers' => $user->followers->count(),
-            'friend_request_sent' => $sentRequest ?? false, // make sure this variable is defined
-            'posts' => $posts
+        return [
+            'id'           => $post->id,
+            'user_id'      => $post->user_id,
+            'name'         => optional($post->user)->name,
+            'content'      => $post->content,
+            'avatar'       => optional($post->user)->avatar ? url($post->user->avatar) : null,
+            'likes_count'  => $post->likes_count,
+            'is_following' => $isFollowing,
+            'media'        => $post->media,
+            'comments'     => $post->comments->map(function ($comment) {
+                return [
+                    'id'         => $comment->id,
+                    'post_id'    => $comment->post_id,
+                    'parent_id'  => $comment->parent_id,
+                    'user_id'    => $comment->user_id,
+                    'user_name'  => optional($comment->user)->name,
+                    'avatar'     => optional($comment->user)->avatar ? url($comment->user->avatar) : null,
+                    'comment'    => $comment->comment,
+                    'created_at' => $comment->created_at->diffForHumans(),
+                    'replies'    => $comment->replies->map(function ($reply) {
+                        return [
+                            'id'         => $reply->id,
+                            'post_id'    => $reply->post_id,
+                            'parent_id'  => $reply->parent_id,
+                            'user_id'    => $reply->user_id,
+                            'user_name'  => optional($reply->user)->name,
+                            'avatar'     => optional($reply->user)->avatar ? url($reply->user->avatar) : null,
+                            'comment'    => $reply->comment,
+                            'created_at' => $reply->created_at->diffForHumans(),
+                        ];
+                    })->values(),
+                ];
+            })->values(),
         ];
+    });
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User profile retrieved successfully',
-            'data' => $info
-        ]);
+    $info = [
+        'id'                    => $user->id,
+        'name'                  => $user->name,
+        'bio'                   => $user->bio,
+        'avatar'                => $user->avatar ? url($user->avatar) : null,
+        'total_post'            => $user->posts->count(),
+        'following'             => $user->followings->count(),
+        'followers'             => $user->followers->count(),
+        'friend_request_sent'   => $sentRequest ?? false,
+        'posts'                 => $posts,
+    ];
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User profile retrieved successfully',
-            'data' => $info
-        ]);
-    }
+    return response()->json([
+        'success' => true,
+        'message' => 'User profile retrieved successfully',
+        'data'    => $info
+    ]);
+}
+
 
 
     public function send($receiverId)

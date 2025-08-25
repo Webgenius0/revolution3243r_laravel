@@ -1,7 +1,7 @@
 import Echo from "laravel-echo";
 import Pusher from "pusher-js";
 
-// window.Pusher = Pusher;
+window.Pusher = Pusher;
 
 window.Echo = new Echo({
     broadcaster: "reverb",
@@ -14,6 +14,7 @@ window.Echo = new Echo({
 });
 
 // Subscribe to the dynamic private channel based on logged-in user
+
 window.Echo.private(`user.${window.authUserId}`)
     .listen("MessageSent", (e) => {
         console.log(e); // Only the authenticated user sees their messages
