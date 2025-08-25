@@ -177,10 +177,17 @@ Route::middleware('auth:api')->prefix('profile')->group(function () {
     Route::get('friend-request', [App\Http\Controllers\Api\UserProfileController::class, 'requests']);
     Route::get('friend-requested', [App\Http\Controllers\Api\UserProfileController::class, 'requested']);
     Route::get('friends', [App\Http\Controllers\Api\UserProfileController::class, 'friends']);
-    Route::post('/friend-request/send/{receiverId}', [App\Http\Controllers\Api\UserProfileController::class, 'send']);
-    Route::post('/friend-request/accept/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'accept']);
-    Route::post('/friend-request/reject/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'reject']);
+
+    // Friend request actions
+    Route::post('friend-request/send/{receiverId}', [App\Http\Controllers\Api\UserProfileController::class, 'send']);
+    Route::post('friend-request/accept/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'accept']);
+    Route::post('friend-request/reject/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'reject']);
+
+    // New APIs
+    Route::post('friend-request/cancel/{receiverId}', [App\Http\Controllers\Api\UserProfileController::class, 'cancelRequest']);
+    Route::post('friend/unfriend/{id}', [App\Http\Controllers\Api\UserProfileController::class, 'unfriend']);
 });
+
 
 Route::middleware(['auth:api'])->controller(ChallengeController::class)->prefix('challenge')->group(function () {
     Route::get('/list', 'index');
