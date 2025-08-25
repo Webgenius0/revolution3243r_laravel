@@ -281,43 +281,43 @@ class UserProfileController extends Controller
             'message' => 'User unfriended successfully'
         ]);
     }
-public function cancelRequest($receiverId)
-{
-    $senderId = auth()->id();
+    public function cancelRequest($receiverId)
+    {
+        $senderId = auth()->id();
 
-    // Check if the user exists
-    $receiver = User::find($receiverId);
-    if (!$receiver) {
+        // Check if the user exists
+        $receiver = User::find($receiverId);
+        if (!$receiver) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        // Find the pending friend request sent by the authenticated user
+        $request = FriendRequest::where('sender_id', $senderId)
+            ->where('receiver_id', $receiverId)
+            ->where('status', 'pending')
+            ->first();
+
+        if (!$request) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No pending friend request to cancel'
+            ], 400);
+        }
+
+        // Delete the pending request
+        $request->delete();
+
+        // Optional: remove following relationship if added when sending request
+        auth()->user()->followings()->detach($receiverId);
+
         return response()->json([
-            'success' => false,
-            'message' => 'User not found'
-        ], 404);
+            'success' => true,
+            'message' => 'Friend request cancelled successfully'
+        ]);
     }
-
-    // Find the pending friend request sent by the authenticated user
-    $request = FriendRequest::where('sender_id', $senderId)
-        ->where('receiver_id', $receiverId)
-        ->where('status', 'pending')
-        ->first();
-
-    if (!$request) {
-        return response()->json([
-            'success' => false,
-            'message' => 'No pending friend request to cancel'
-        ], 400);
-    }
-
-    // Delete the pending request
-    $request->delete();
-
-    // Optional: remove following relationship if added when sending request
-    auth()->user()->followings()->detach($receiverId);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Friend request cancelled successfully'
-    ]);
-}
 
     public function friends()
     {
@@ -329,13 +329,17 @@ public function cancelRequest($receiverId)
             ->where('status', 'accepted')
             ->get()
             ->map(function ($req) {
+                $sender = $req->sender;
+                if (!$sender) return null; // skip if sender is missing
+
                 return [
-                    'friend_id' => $req->sender->id,
-                    'friend_name' => $req->sender->name,
-                    'friend_avatar' => $req->sender->avatar ? url($req->sender->avatar) : null,
+                    'friend_id' => $sender->id,
+                    'friend_name' => $sender->name,
+                    'friend_avatar' => $sender->avatar ? url($sender->avatar) : null,
                     'friend_since' => $req->updated_at->diffForHumans(),
                 ];
-            });
+            })
+            ->filter(); // remove nulls
 
         // Friends where user is the sender
         $friendsAsSender = FriendRequest::with('receiver')
@@ -343,15 +347,19 @@ public function cancelRequest($receiverId)
             ->where('status', 'accepted')
             ->get()
             ->map(function ($req) {
+                $receiver = $req->receiver;
+                if (!$receiver) return null; // skip if receiver is missing
+
                 return [
-                    'friend_id' => $req->receiver->id,
-                    'friend_name' => $req->receiver->name,
-                    'friend_avatar' => $req->receiver->avatar ? url($req->receiver->avatar) : null,
+                    'friend_id' => $receiver->id,
+                    'friend_name' => $receiver->name,
+                    'friend_avatar' => $receiver->avatar ? url($receiver->avatar) : null,
                     'friend_since' => $req->updated_at->diffForHumans(),
                 ];
-            });
+            })
+            ->filter(); // remove nulls
 
-        // Merge both
+        // Merge both collections
         $friends = $friendsAsReceiver->merge($friendsAsSender);
 
         return response()->json([
@@ -360,6 +368,7 @@ public function cancelRequest($receiverId)
             'data' => $friends->values(),
         ]);
     }
+
     // Reject request
     public function reject($id)
     {
