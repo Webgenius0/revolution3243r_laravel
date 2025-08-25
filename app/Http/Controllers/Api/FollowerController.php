@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\FriendRequest;
 use Illuminate\Http\Request;
 use App\Models\User;
 
@@ -86,6 +87,12 @@ class FollowerController extends Controller
         // Detach follow relationships if any
         $user->followings()->detach($userId);
         $user->followers()->detach($userId);
+
+        FriendRequest::where(function ($q) use ($user, $userId) {
+            $q->where('sender_id', $user->id)->where('receiver_id', $userId);
+        })->orWhere(function ($q) use ($user, $userId) {
+            $q->where('sender_id', $userId)->where('receiver_id', $user->id);
+        })->delete();
 
         $user->blockedUsers()->attach($userId);
 
