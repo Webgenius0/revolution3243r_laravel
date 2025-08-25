@@ -94,6 +94,7 @@ class FollowerController extends Controller
             $q->where('sender_id', $userId)->where('receiver_id', $user->id);
         })->delete();
 
+
         $user->blockedUsers()->attach($userId);
 
         return response()->json(['success' => true, 'message' => 'User blocked successfully']);

@@ -26,7 +26,7 @@ class RegisterController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->select = ['id', 'name', 'email', 'otp', 'avatar', 'otp_verified_at', 'last_activity_at', 'rider_type'];
+        $this->select = ['id', 'name', 'email', 'otp', 'avatar', 'otp_verified_at', 'last_activity_at', 'rider_type','otp_expires_at'];
     }
 
     public function register(Request $request)
@@ -62,7 +62,7 @@ class RegisterController extends Controller
             $user->save();
 
             // Mail::to($user->email)->send(new OtpMail($user->otp, $user, 'Verify Your Email Address'));
-$user->makeHidden(['roles']);
+            $user->makeHidden(['roles']);
 
             return response()->json([
                 'status' => 'success',
@@ -92,8 +92,9 @@ $user->makeHidden(['roles']);
             ], 422);
         }
 
-        $user = User::where('email', $request->email)->first();
-
+        $user = User::where('email', $request->email)
+            ->select($this->select)
+            ->first();
         if (!$user) {
             return response()->json([
                 'status' => 'error',
@@ -124,6 +125,7 @@ $user->makeHidden(['roles']);
         return response()->json([
             'status' => 'success',
             'message' => 'OTP verified successfully. You can now log in.',
+            "data" => $user
         ]);
     }
 
