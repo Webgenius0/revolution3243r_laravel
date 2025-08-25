@@ -121,11 +121,13 @@ class RegisterController extends Controller
         $user->otp_expires_at = null;
         $user->otp_verified_at = now();
         $user->save();
+            $token = auth('api')->login($user);
 
         return response()->json([
             'status' => 'success',
             'message' => 'OTP verified successfully. You can now log in.',
-            "data" => $user
+            "data" => $user,
+            'token' => $token
         ]);
     }
 
