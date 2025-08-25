@@ -10,25 +10,30 @@ use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 
+use Intervention\Image\Facades\Image; // Make sure this is at the top
 class Helper
 {
     //! File or Image Upload
-    public static function fileUpload($file, string $folder, string $name): ?string
-    {
-        if (!$file->isValid()) {
-            return null;
-        }
-
-        $imageName = Str::slug($name) . '.' . $file->extension();
-        $path      = public_path('uploads/' . $folder);
-        if (!file_exists($path)) {
-            mkdir($path, 0777, true);
-        }
-        $file->move($path, $imageName);
-        return 'uploads/' . $folder . '/' . $imageName;
+   public static function fileUpload($file, string $folder, string $name): ?string
+{
+    if (!$file->isValid()) {
+        return null;
     }
 
-    //! File or Image Delete
+    $imageName = Str::slug(pathinfo($name, PATHINFO_FILENAME)) . '.webp';
+    $path = public_path('uploads/' . $folder);
+
+    if (!file_exists($path)) {
+        mkdir($path, 0777, true);
+    }
+
+    // Use the Facade
+    Image::make($file->getRealPath())
+         ->encode('webp', 90)
+         ->save($path . '/' . $imageName);
+
+    return 'uploads/' . $folder . '/' . $imageName;
+}
     public static function fileDelete(string $path): void
     {
         if (file_exists($path)) {
@@ -116,5 +121,4 @@ class Helper
         }
         return;
     }
-
 }
