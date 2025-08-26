@@ -47,50 +47,58 @@ class UserController extends Controller
         return Helper::jsonResponse(true, 'User details fetched successfully', 200, $data);
     }
 
-    public function updateProfile(Request $request)
-    {
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:100',
-            'avatar' => 'nullable',
-            'phone' => 'nullable|string|numeric|max_digits:20',
-            'password' => 'nullable|string|min:6|confirmed',
-            'address' => 'nullable|string|max:255',
-            'bio' => 'nullable|string',
-        ]);
+  public function updateProfile(Request $request)
+{
+    $validatedData = $request->validate([
+        'name' => 'required|string|max:100',
+        'avatar' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,heif,heic|max:100000', // 5MB max
+        'phone' => 'nullable|string|numeric|max_digits:20',
+        'password' => 'nullable|string|min:6|confirmed',
+        'address' => 'nullable|string|max:255',
+        'bio' => 'nullable|string',
+    ]);
 
-        $user = auth('api')->user();
+    $user = auth('api')->user();
 
-        // Handle password
-        if (!empty($validatedData['password'])) {
-            $validatedData['password'] = bcrypt($validatedData['password']);
-        } else {
-            unset($validatedData['password']);
-        }
-
-        // Handle avatar upload
-        if ($request->hasFile('avatar')) {
-            if (!empty($user->avatar)) {
-                Helper::fileDelete(public_path($user->getRawOriginal('avatar')));
-            }
-            $validatedData['avatar'] = Helper::fileUpload($request->file('avatar'), 'user/avatar', getFileName($request->file('avatar')));
-        } else {
-            // keep old avatar if no new uploaded
-            $validatedData['avatar'] = $user->avatar;
-        }
-
-        // For other nullable fields, if null or empty in request, keep existing values
-        $fieldsToCheck = ['phone', 'address', 'bio'];
-        foreach ($fieldsToCheck as $field) {
-            if (!array_key_exists($field, $validatedData) || $validatedData[$field] === null || $validatedData[$field] === '') {
-                $validatedData[$field] = $user->{$field};
-            }
-        }
-
-        $user->update($validatedData);
-
-        $data = User::select($this->select)->with('roles')->find($user->id);
-        return Helper::jsonResponse(true, 'Profile updated successfully', 200, $data);
+    // Handle password
+    if (!empty($validatedData['password'])) {
+        $validatedData['password'] = bcrypt($validatedData['password']);
+    } else {
+        unset($validatedData['password']);
     }
+
+    // Handle avatar upload
+    if ($request->hasFile('avatar')) {
+        // Delete old avatar if exists
+        if (!empty($user->avatar)) {
+            Helper::fileDelete(public_path($user->getRawOriginal('avatar')));
+        }
+
+        $file = $request->file('avatar');
+        $validatedData['avatar'] = Helper::fileUpload(
+            $file,
+            'user/avatar',
+            getFileName($file)
+        );
+    } else {
+        // Keep old avatar if no new uploaded
+        $validatedData['avatar'] = $user->avatar;
+    }
+
+    // For other nullable fields, keep existing if empty
+    $fieldsToCheck = ['phone', 'address', 'bio'];
+    foreach ($fieldsToCheck as $field) {
+        if (!array_key_exists($field, $validatedData) || $validatedData[$field] === null || $validatedData[$field] === '') {
+            $validatedData[$field] = $user->{$field};
+        }
+    }
+
+    $user->update($validatedData);
+
+    $data = User::select($this->select)->with('roles')->find($user->id);
+    return Helper::jsonResponse(true, 'Profile updated successfully', 200, $data);
+}
+
 
 
     public function updateAvatar(Request $request)
