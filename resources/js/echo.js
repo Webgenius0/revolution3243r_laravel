@@ -19,3 +19,4 @@ window.Echo.private(`user.${window.authUserId}`)
     .listen("MessageSent", (e) => {
         console.log(e); // Only the authenticated user sees their messages
     });
+

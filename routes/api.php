@@ -27,7 +27,7 @@ use App\Http\Controllers\Api\Frontend\SocialLinksController;
 use App\Http\Controllers\Api\Frontend\SubcategoryController;
 use App\Http\Controllers\Api\PostController as ApiPostController;
 use App\Http\Controllers\Api\TrackController;
-
+use App\Http\Controllers\ReviewController;
 
 //page
 Route::get('/page/home', [HomeController::class, 'index']);
@@ -226,4 +226,12 @@ Route::middleware(['auth:api'])->controller(TrackController::class)->prefix('tra
 
 Route::prefix('cms')->name('cms.')->group(function () {
     Route::get('home', [HomeController::class, 'index'])->name('home');
+});
+
+Route::middleware(['auth:api'])->controller(ReviewController::class)->prefix('reviews')->group(function () {
+    Route::get("/", "index");          // GET /api/reviews → list all reviews
+    Route::get("/{id}", "show");       // GET /api/reviews/{id} → single review
+    Route::post("/add", "store");      // POST /api/reviews/add → create review
+    Route::put("/update/{id}", "update"); // PUT /api/reviews/update/{id} → update review
+    Route::delete("/delete/{id}", "destroy"); // DELETE /api/reviews/delete/{id} → delete review
 });

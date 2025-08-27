@@ -27,10 +27,7 @@ class Helper
         mkdir($path, 0777, true);
     }
 
-    // Use the Facade
-    Image::make($file->getRealPath())
-         ->encode('webp', 90)
-         ->save($path . '/' . $imageName);
+
 
     return 'uploads/' . $folder . '/' . $imageName;
 }
