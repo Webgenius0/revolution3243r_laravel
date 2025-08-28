@@ -419,15 +419,14 @@ function addNotification(notification) {
     }
 
     // Show a toast alert
-    Swal.fire({
-        title: title,
-        text: message,
-        icon: 'info',
-        showConfirmButton: false,
-        timer: 4000,
-        toast: true,
-        position: ''
-    });
+Swal.fire({
+    title: title,
+    text: message,
+    icon: 'info',
+    showConfirmButton: false,
+    timer: 4000,
+    position: 'center' // shows in the middle
+});
 }
 
 @if (auth()->check())
