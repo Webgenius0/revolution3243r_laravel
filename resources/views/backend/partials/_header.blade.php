@@ -426,7 +426,7 @@ function addNotification(notification) {
         showConfirmButton: false,
         timer: 4000,
         toast: true,
-        position: 'top-end'
+        position: ''
     });
 }
 
