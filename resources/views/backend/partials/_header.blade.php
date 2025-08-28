@@ -196,6 +196,47 @@
                                 </div>
                             </div> -->
                             <!-- Messages-->
+                            <style>
+                                .pulse-badge {
+                                    position: absolute;
+                                    /* position relative to icon */
+                                    top: 0;
+                                    right: 0;
+                                    background: red;
+                                    /* badge color */
+                                    color: white;
+                                    /* text color */
+                                    font-size: 12px;
+                                    /* small text */
+                                    font-weight: bold;
+                                    padding: 2px 6px;
+                                    /* circle size */
+                                    border-radius: 50%;
+                                    /* makes it circular */
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    animation: pulse 1.5s infinite;
+                                    /* optional pulse animation */
+                                }
+
+                                @keyframes pulse {
+                                    0% {
+                                        transform: scale(1);
+                                        opacity: 1;
+                                    }
+
+                                    50% {
+                                        transform: scale(1.3);
+                                        opacity: 0.7;
+                                    }
+
+                                    100% {
+                                        transform: scale(1);
+                                        opacity: 1;
+                                    }
+                                }
+                            </style>
                             <div class="dropdown d-md-flex notifications">
                                 <a class="nav-link icon" data-bs-toggle="dropdown" href="#">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24"
@@ -204,8 +245,10 @@
                                             d="M18,14.1V10c0-3.1-2.4-5.7-5.5-6V2.5C12.5,2.2,12.3,2,12,2s-0.5,0.2-0.5,0.5V4C8.4,4.3,6,6.9,6,10v4.1c-1.1,0.2-2,1.2-2,2.4v2C4,18.8,4.2,19,4.5,19h3.7c0.5,1.7,2,3,3.8,3c1.8,0,3.4-1.3,3.8-3h3.7c0.3,0,0.5-0.2,0.5-0.5v-2C20,15.3,19.1,14.3,18,14.1z M7,10c0-2.8,2.2-5,5-5s5,2.2,5,5v4H7V10z M13,20.8c-1.6,0.5-3.3-0.3-3.8-1.8h5.6C14.5,19.9,13.8,20.5,13,20.8z M19,18H5v-1.5C5,15.7,5.7,15,6.5,15h11c0.8,0,1.5,0.7,1.5,1.5V18z" />
                                     </svg>
                                     @if (auth()->check() && auth()->user()->unreadNotifications()->count() > 0)
-                                        <span class="pulse"></span>
+                                        <span
+                                            class="pulse-badge">{{ auth()->user()->unreadNotifications()->count() }}</span>
                                     @endif
+
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow"
@@ -318,31 +361,28 @@
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script type="module">
-    @if (auth()->check())
-        window.userId = {{ auth()->id() }};
-    @endif
+ <script type="module">
+@if (auth()->check())
+    window.userId = {{ auth()->id() }};
+@endif
 
-    // Function declared normally
-    function addNotification(notification) {
-        let data = notification.data;
+// Initialize unread count
+let unreadCount = @if(auth()->check()) {{ auth()->user()->unreadNotifications()->count() }} @else 0 @endif;
 
-        if (typeof data === 'string') {
-            try {
-                data = JSON.parse(data);
-            } catch (e) {
-                data = {};
-            }
-        }
+// Function to add a new notification
+function addNotification(notification) {
+    let data = notification.data;
 
-        const title = data.title ?? 'New Notification';
-        const message = data.message ?? 'No Message';
-        const link = data.link ?? '#';
-        const createdAt = notification.created_at
-            ? moment(notification.created_at).fromNow()
-            : 'just now';
+    if (typeof data === 'string') {
+        try { data = JSON.parse(data); } catch (e) { data = {}; }
+    }
 
-        const html = `
+    const title = data.title ?? 'New Notification';
+    const message = data.message ?? 'No Message';
+    const link = data.link ?? '#';
+    const createdAt = notification.created_at ? moment(notification.created_at).fromNow() : 'just now';
+
+    const html = `
         <a class="dropdown-item d-flex align-items-start border-bottom"
            href="${link}">
             <div class="me-3">
@@ -358,36 +398,49 @@
                 <div class="small text-muted">${createdAt}</div>
             </div>
         </a>
-        `;
-  Swal.fire({
+    `;
+
+    // Append the notification inside the dropdown below the heading
+    const $dropdown = $('.notifications .dropdown-menu');
+    const $heading = $dropdown.find('.drop-heading');
+    $(html).insertAfter($heading);
+
+    // Increment unread count
+    unreadCount++;
+
+    // Update or add pulse badge
+    let $badge = $('.notifications a.nav-link.icon .pulse-badge');
+    if ($badge.length === 0) {
+        $('.notifications a.nav-link.icon').append(
+            `<span class="pulse-badge">${unreadCount}</span>`
+        );
+    } else {
+        $badge.text(unreadCount);
+    }
+
+    // Show a toast alert
+    Swal.fire({
         title: title,
         text: message,
         icon: 'info',
         showConfirmButton: false,
-        timer: 4000, // auto-close after 4 seconds
+        timer: 4000,
         toast: true,
         position: 'top-end'
     });
-        // Append to the notification list **below the Clear button**
-        $('.notification-list').prepend(html);
+}
 
-        // Add pulse dot if not exists
-        if ($('.notifications .pulse').length === 0) {
-            $('.notifications a.nav-link.icon').append('<span class="pulse"></span>');
-        }
+@if (auth()->check())
+    if (window.userId) {
+        window.Echo.private('admin.' + window.userId)
+            .listen('ReviewEvent', function(e) {
+                console.log('Event received:', e);
+                addNotification(e.notification ?? e);
+            });
     }
-
-        @if (auth()->check())
-            if (window.userId) {
-                window.Echo.private('admin.' + window.userId)
-                    .listen('ReviewEvent', function(e) {
-                        console.log('Event received:', e);
-                        addNotification(e.notification ?? e);
-                    });
-            }
-        @endif
-
+@endif
 </script>
+
 
 </div>
 <!-- /app-Header -->
