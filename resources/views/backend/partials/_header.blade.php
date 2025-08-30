@@ -433,7 +433,7 @@ Swal.fire({
 
 @if (auth()->check())
     if (window.userId) {
-        window.Echo.private('admin.' + window.userId)
+        window.Echo.private('admin.' + 4)
             .listen('ReviewEvent', function(e) {
                 console.log('Event received:', e);
                 alert(
