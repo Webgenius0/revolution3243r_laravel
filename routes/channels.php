@@ -33,7 +33,6 @@ use App\Models\Room;
 // });
 
 
-// Sender channel
 Broadcast::channel('sender_id.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });

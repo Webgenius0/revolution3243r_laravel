@@ -15,7 +15,7 @@ window.Echo = new Echo({
 
 // Subscribe to the dynamic private channel based on logged-in user
 
-window.Echo.private(`user.${window.authUserId}`)
+window.Echo.private(`receiver_id.${window.authUserId}`)
     .listen("MessageSent", (e) => {
         console.log('reciver',e); // Only the authenticated user sees their messages
     });
