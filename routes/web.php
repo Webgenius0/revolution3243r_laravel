@@ -29,4 +29,21 @@ Route::controller(NotificationController::class)->prefix('notification')->name('
     Route::POST('read/all', 'readAll')->name('read.all');
 })->middleware('auth');
 
+Route::get('/clear-cache', function() {
+    try {
+        Artisan::call('cache:clear');        // Clear application cache
+        Artisan::call('config:clear');       // Clear config cache
+        Artisan::call('route:clear');        // Clear route cache
+        Artisan::call('view:clear');         // Clear compiled views
+        return response()->json([
+            'success' => true,
+            'message' => 'All caches cleared successfully!'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+    }
+});
 require __DIR__.'/auth.php';
