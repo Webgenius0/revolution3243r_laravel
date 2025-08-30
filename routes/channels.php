@@ -33,9 +33,9 @@ use App\Models\Room;
 // });
 
 
-Broadcast::channel('sender_id.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
-});
+// Broadcast::channel('sender_id.{id}', function ($user, $id) {
+//     return (int) $user->id === (int) $id;
+// });
 
 // Broadcast::channel('sender_id.{id}', function ($user, $id) {
 //     return (int) 108 === (int) $id;
