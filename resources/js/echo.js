@@ -17,6 +17,6 @@ window.Echo = new Echo({
 
 window.Echo.private(`user.${window.authUserId}`)
     .listen("MessageSent", (e) => {
-        console.log(e); // Only the authenticated user sees their messages
+        console.log('reciver',e); // Only the authenticated user sees their messages
     });
 
