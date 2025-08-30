@@ -43,7 +43,7 @@ Broadcast::channel('sender_id.{id}', function ($user, $id) {
 
 
 Broadcast::channel('receiver_id.{id}', function ($user, $id) {
-    return (int) 2 === (int) $id;
+    return (int) $user->id === (int) $id;
 });
 
 
