@@ -37,9 +37,9 @@ use App\Models\Room;
 //     return (int) $user->id === (int) $id;
 // });
 
-// Broadcast::channel('sender_id.{id}', function ($user, $id) {
-//     return (int) 108 === (int) $id;
-// });
+Broadcast::channel('sender_id.{id}', function ($user, $id) {
+    return (int) 108 === (int) $id;
+});
 
 
 Broadcast::channel('receiver_id.{id}', function ($user, $id) {
