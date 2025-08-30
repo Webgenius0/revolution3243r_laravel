@@ -371,6 +371,8 @@ let unreadCount = @if(auth()->check()) {{ auth()->user()->unreadNotifications()-
 
 // Function to add a new notification
 function addNotification(notification) {
+    alert(notification);
+
     let data = notification.data;
 
     if (typeof data === 'string') {
@@ -434,6 +436,9 @@ Swal.fire({
         window.Echo.private('admin.' + window.userId)
             .listen('ReviewEvent', function(e) {
                 console.log('Event received:', e);
+                alert(
+                    e
+                );
                 addNotification(e.notification ?? e);
             });
     }
