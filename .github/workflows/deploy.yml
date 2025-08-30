@@ -14,6 +14,6 @@ jobs:
       - name: FTP-Deploy-Action
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
-          server: ftp.softvencefsd.xyz
-          username: revolution3243r@revolution3243r.softvencefsd.xyz
-          password: "S(HPwic^H&=q~AP^"
+          server: 31.97.39.27
+          username: chatspeedx-backend
+          password: "tWegp9AhW4N2vQfo50eK"
