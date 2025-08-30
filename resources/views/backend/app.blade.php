@@ -46,7 +46,7 @@
 
     </div>
     <script>
-        window.authUserId = {{ auth()->check() ? auth()->id() : 'null' }};
+    window.authUserId = @json(auth()->id());
     </script>
 
     <!-- page -->
